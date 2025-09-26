@@ -1,280 +1,367 @@
-// Application State
-let currentPage = 'dashboard';
-let medications = [];
-let labResults = null;
-let userProfile = {};
-let dashboardStats = {};
+// MedSync Application JavaScript
 
-// Sample data from the application
-const sampleData = {
-  "sampleLabResults": {
-    "testType": "Complete Blood Count (CBC)",
-    "date": "2025-09-20",
-    "currentAiSummary": "Your recent CBC results indicate mild anemia with low hemoglobin and hematocrit levels, while platelets are slightly elevated suggesting possible inflammation. Your iron supplement regimen appears to be helping, and consistency with medications has improved. Continue current treatment plan and consider adding vitamin C to enhance iron absorption.",
-    "aiSummaryHistory": [
-      {
-        "date": "2025-09-20",
-        "testType": "Complete Blood Count (CBC)",
-        "summary": "Your recent CBC results indicate mild anemia with low hemoglobin and hematocrit levels, while platelets are slightly elevated suggesting possible inflammation. Your iron supplement regimen appears to be helping, and consistency with medications has improved. Continue current treatment plan and consider adding vitamin C to enhance iron absorption."
-      },
-      {
-        "date": "2025-08-15",
-        "testType": "Basic Metabolic Panel",
-        "summary": "Your glucose levels are well-controlled with current medication. Kidney function markers are normal. Continue monitoring blood sugar and maintain current diabetic medication schedule for optimal management."
-      },
-      {
-        "date": "2025-07-10",
-        "testType": "Lipid Panel",
-        "summary": "Cholesterol levels have improved since starting dietary changes. HDL is within normal range, but LDL remains slightly elevated. Consider increasing omega-3 rich foods and maintaining regular exercise routine."
-      },
-      {
-        "date": "2025-06-05",
-        "testType": "Thyroid Function Tests",
-        "summary": "Thyroid function is normal across all markers. TSH levels are stable, indicating good thyroid health. Continue current monitoring schedule and maintain healthy lifestyle habits."
-      }
-    ]
-  },
-  "sampleMedications": [
-    {
-      "id": "med1",
-      "name": "Iron Supplement",
-      "dosage": 65,
-      "unit": "mg",
-      "frequency": "once_daily",
-      "times": ["08:00"],
-      "instructions": "Take with vitamin C for better absorption",
-      "withFood": true,
-      "active": true,
-      "consistencyRate": 85,
-      "lastTaken": null,
-      "nextDue": "2025-09-26T08:00:00"
+// Application State
+let appState = {
+    currentPage: 'dashboard',
+    userProfile: {
+        name: "Sarah Johnson",
+        age: 34,
+        height: "5'6\"",
+        weight: "145 lbs",
+        gender: "Female",
+        bloodType: "O+",
+        conditions: ["Type 2 Diabetes", "Iron Deficiency Anemia"],
+        allergies: ["Penicillin", "Shellfish"],
+        emergencyContact: {
+            name: "Michael Johnson",
+            relation: "Spouse",
+            phone: "+1 (555) 123-4567"
+        },
+        notificationPreferences: {
+            emailReminders: true,
+            pushNotifications: true,
+            soundAlerts: false,
+            reminderAdvance: 30
+        }
     },
-    {
-      "id": "med2", 
-      "name": "Vitamin D3",
-      "dosage": 1000,
-      "unit": "IU",
-      "frequency": "once_daily",
-      "times": ["20:00"],
-      "instructions": "Take with evening meal",
-      "withFood": true,
-      "active": true,
-      "consistencyRate": 92,
-      "lastTaken": "2025-09-25T20:00:00",
-      "nextDue": "2025-09-26T20:00:00"
+    medications: [
+        {
+            id: "med1",
+            name: "Iron Supplement",
+            dosage: 65,
+            unit: "mg",
+            frequency: "once_daily",
+            times: ["08:00"],
+            instructions: "Take with vitamin C for better absorption",
+            withFood: true,
+            active: true,
+            consistencyRate: 85,
+            lastTaken: null,
+            nextDue: "2025-09-26T08:00:00"
+        },
+        {
+            id: "med2",
+            name: "Vitamin D3",
+            dosage: 1000,
+            unit: "IU",
+            frequency: "once_daily",
+            times: ["20:00"],
+            instructions: "Take with evening meal",
+            withFood: true,
+            active: true,
+            consistencyRate: 92,
+            lastTaken: "2025-09-25T20:00:00",
+            nextDue: "2025-09-26T20:00:00"
+        },
+        {
+            id: "med3",
+            name: "Metformin",
+            dosage: 500,
+            unit: "mg",
+            frequency: "twice_daily",
+            times: ["08:00", "20:00"],
+            instructions: "Take with meals to reduce stomach upset",
+            withFood: true,
+            active: true,
+            consistencyRate: 78,
+            lastTaken: "2025-09-26T08:00:00",
+            nextDue: "2025-09-26T20:00:00"
+        }
+    ],
+    labResults: {
+        testType: "Complete Blood Count (CBC)",
+        date: "2025-09-20",
+        currentAiSummary: "Your recent CBC results indicate mild anemia with low hemoglobin and hematocrit levels, while platelets are slightly elevated suggesting possible inflammation. Your iron supplement regimen appears to be helping, and consistency with medications has improved. Continue current treatment plan and consider adding vitamin C to enhance iron absorption.",
+        aiSummaryHistory: [
+            {
+                date: "2025-09-20",
+                testType: "Complete Blood Count (CBC)",
+                summary: "Your recent CBC results indicate mild anemia with low hemoglobin and hematocrit levels, while platelets are slightly elevated suggesting possible inflammation. Your iron supplement regimen appears to be helping, and consistency with medications has improved. Continue current treatment plan and consider adding vitamin C to enhance iron absorption."
+            },
+            {
+                date: "2025-08-15",
+                testType: "Basic Metabolic Panel",
+                summary: "Your glucose levels are well-controlled with current medication. Kidney function markers are normal. Continue monitoring blood sugar and maintain current diabetic medication schedule for optimal management."
+            },
+            {
+                date: "2025-07-10",
+                testType: "Lipid Panel",
+                summary: "Cholesterol levels have improved since starting dietary changes. HDL is within normal range, but LDL remains slightly elevated. Consider increasing omega-3 rich foods and maintaining regular exercise routine."
+            },
+            {
+                date: "2025-06-05",
+                testType: "Thyroid Function Tests",
+                summary: "Thyroid function is normal across all markers. TSH levels are stable, indicating good thyroid health. Continue current monitoring schedule and maintain healthy lifestyle habits."
+            }
+        ]
     },
-    {
-      "id": "med3",
-      "name": "Metformin",
-      "dosage": 500,
-      "unit": "mg", 
-      "frequency": "twice_daily",
-      "times": ["08:00", "20:00"],
-      "instructions": "Take with meals to reduce stomach upset",
-      "withFood": true,
-      "active": true,
-      "consistencyRate": 78,
-      "lastTaken": "2025-09-26T08:00:00",
-      "nextDue": "2025-09-26T20:00:00"
-    }
-  ],
-  "userProfile": {
-    "name": "Sarah Johnson",
-    "age": 34,
-    "height": "5'6\"",
-    "weight": "145 lbs",
-    "gender": "Female",
-    "bloodType": "O+",
-    "conditions": ["Type 2 Diabetes", "Iron Deficiency Anemia"],
-    "allergies": ["Penicillin", "Shellfish"],
-    "emergencyContact": {
-      "name": "Michael Johnson",
-      "relation": "Spouse", 
-      "phone": "+1 (555) 123-4567"
+    dashboardStats: {
+        lastTestDate: "September 20, 2025",
+        aiHealthSummary: "Recent lab work shows improvement in anemia management with current iron supplementation. Blood sugar levels remain well-controlled with Metformin. Your medication consistency has improved significantly over the past month, which is contributing to better health outcomes. Continue current treatment plan and consider adding vitamin C to enhance iron absorption effectiveness.",
+        activeMedications: 3,
+        consistencyRate: 85
     },
-    "notificationPreferences": {
-      "emailReminders": true,
-      "pushNotifications": true,
-      "soundAlerts": false,
-      "reminderAdvance": 30
-    }
-  },
-  "dashboardStats": {
-    "lastTestDate": "September 20, 2025",
-    "aiHealthSummary": "Recent lab work shows improvement in anemia management with current iron supplementation. Blood sugar levels remain well-controlled with Metformin. Your medication consistency has improved significantly over the past month, which is contributing to better health outcomes. Continue current treatment plan and consider adding vitamin C to enhance iron absorption effectiveness.",
-    "activeMedications": 3,
-    "consistencyRate": 85
-  }
+    familyMembers: [
+        {
+            id: "fam1",
+            name: "Robert Johnson",
+            relationship: "Father",
+            age: 62,
+            status: "living",
+            conditions: ["Type 2 Diabetes", "Hypertension", "Coronary Artery Disease"],
+            allergies: ["Sulfa drugs"],
+            profileImage: "fas fa-user-tie"
+        },
+        {
+            id: "fam2", 
+            name: "Linda Johnson",
+            relationship: "Mother",
+            age: 59,
+            status: "living",
+            conditions: ["Migraine", "Osteoporosis"],
+            allergies: ["Latex"],
+            profileImage: "fas fa-user"
+        },
+        {
+            id: "fam3",
+            name: "Mark Johnson", 
+            relationship: "Brother",
+            age: 36,
+            status: "living",
+            conditions: ["Asthma", "Color Blindness"],
+            allergies: ["Peanuts", "Tree nuts"],
+            profileImage: "fas fa-user"
+        },
+        {
+            id: "fam4",
+            name: "William Johnson",
+            relationship: "Paternal Grandfather",
+            age: 89,
+            status: "living",
+            conditions: ["Alzheimer's Disease", "Type 2 Diabetes"],
+            allergies: ["Iodine"],
+            profileImage: "fas fa-user-shield"
+        },
+        {
+            id: "fam5",
+            name: "Margaret Johnson", 
+            relationship: "Paternal Grandmother",
+            age: 85,
+            status: "deceased",
+            conditions: ["Thalassemia Beta", "Hypertension"],
+            allergies: ["Aspirin"],
+            profileImage: "fas fa-user"
+        },
+        {
+            id: "fam6",
+            name: "Thomas Wilson",
+            relationship: "Maternal Grandfather", 
+            age: 91,
+            status: "living",
+            conditions: ["Parkinson's Disease", "Coronary Artery Disease"],
+            allergies: ["Shellfish"],
+            profileImage: "fas fa-user-shield"
+        },
+        {
+            id: "fam7",
+            name: "Helen Wilson",
+            relationship: "Maternal Grandmother",
+            age: 88,
+            status: "living", 
+            conditions: ["Celiac Disease", "Familial Hypercholesterolemia"],
+            allergies: ["Gluten", "Penicillin"],
+            profileImage: "fas fa-user"
+        }
+    ],
+    geneticRiskConditions: [
+        "Sickle Cell Disease", "Thalassemia (Alpha & Beta)", "G6PD Deficiency", 
+        "Hereditary Hemochromatosis", "Familial Hypercholesterolemia", "Down Syndrome",
+        "Turner Syndrome", "Klinefelter Syndrome", "Fragile X Syndrome", 
+        "Type 2 Diabetes (genetic predisposition)", "Hypertension (familial risk)",
+        "Coronary Artery Disease (familial risk)", "Asthma (heritable component)",
+        "Color Blindness (especially red–green)", "Lactose Intolerance",
+        "Celiac Disease", "Polycystic Kidney Disease (PKD)", 
+        "Polycystic Ovary Syndrome (PCOS)", "Alzheimer's Disease (familial/genetic risk forms)",
+        "Parkinson's Disease (familial forms)", "Obesity (genetic predisposition)",
+        "Schizophrenia (genetic risk)", "Bipolar Disorder (genetic risk)",
+        "Autism Spectrum Disorder (heritable component)", "Migraine (familial patterns)",
+        "Epilepsy (genetic forms)"
+    ],
+    riskAssessments: [
+        {
+            condition: "Type 2 Diabetes",
+            riskLevel: "high",
+            familyMembers: ["Robert Johnson", "William Johnson"],
+            inheritancePattern: "Multifactorial inheritance with strong genetic component",
+            recommendation: "Regular glucose screening, lifestyle modifications, genetic counseling recommended"
+        },
+        {
+            condition: "Thalassemia Beta", 
+            riskLevel: "moderate",
+            familyMembers: ["Margaret Johnson"],
+            inheritancePattern: "Autosomal recessive inheritance",
+            recommendation: "Genetic testing recommended, especially before family planning"
+        },
+        {
+            condition: "Alzheimer's Disease",
+            riskLevel: "moderate", 
+            familyMembers: ["William Johnson"],
+            inheritancePattern: "Complex inheritance with genetic risk factors",
+            recommendation: "Cognitive health monitoring, lifestyle modifications, genetic counseling available"
+        },
+        {
+            condition: "Familial Hypercholesterolemia",
+            riskLevel: "moderate",
+            familyMembers: ["Helen Wilson"], 
+            inheritancePattern: "Autosomal dominant inheritance",
+            recommendation: "Lipid screening, cardiac risk assessment, genetic testing considered"
+        }
+    ],
+    editingFamilyMember: null
 };
 
-// Initialize application
+// DOM Elements
+const sidebar = document.getElementById('sidebar');
+const sidebarToggle = document.getElementById('sidebarToggle');
+const menuItems = document.querySelectorAll('.menu-item');
+const pages = document.querySelectorAll('.page');
+const toastContainer = document.getElementById('toastContainer');
+
+// Initialize Application
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM Content Loaded - Initializing app...');
-    initializeApp();
-});
-
-function initializeApp() {
-    console.log('Initializing app...');
-    
-    // Load sample data
-    medications = [...sampleData.sampleMedications];
-    labResults = { ...sampleData.sampleLabResults };
-    userProfile = { ...sampleData.userProfile };
-    dashboardStats = { ...sampleData.dashboardStats };
-
-    console.log('Loaded medications:', medications);
-    console.log('Loaded lab results:', labResults);
-
-    // Set up navigation
-    setupNavigation();
-    
-    // Initialize pages
+    initializeNavigation();
     initializeDashboard();
     initializeLabResults();
     initializeMedications();
+    initializeFamilyHistory();
     initializeProfile();
+    initializeModals();
+    initializeFileUpload();
     
-    // Set up file uploads
-    setupFileUploads();
-    
-    // Set up modal - do this after DOM is ready
-    setTimeout(() => {
-        setupModal();
-    }, 100);
-    
-    // Show dashboard by default
+    // Show initial page
     showPage('dashboard');
-    
-    // Update user name in header
-    const userNameEl = document.getElementById('user-name');
-    if (userNameEl && userProfile.name) {
-        userNameEl.textContent = userProfile.name.split(' ')[0];
-    }
-}
+});
 
-// Navigation
-function setupNavigation() {
-    const navLinks = document.querySelectorAll('.nav-link');
-    
-    navLinks.forEach(link => {
-        link.addEventListener('click', function(e) {
-            e.preventDefault();
-            const page = this.getAttribute('data-page');
+// Navigation Functions
+function initializeNavigation() {
+    // Sidebar toggle for mobile
+    sidebarToggle.addEventListener('click', function() {
+        sidebar.classList.toggle('active');
+    });
+
+    // Menu item clicks
+    menuItems.forEach(item => {
+        item.addEventListener('click', function() {
+            const page = this.dataset.page;
             showPage(page);
+            
+            // Close sidebar on mobile
+            if (window.innerWidth <= 768) {
+                sidebar.classList.remove('active');
+            }
         });
+    });
+
+    // Close sidebar when clicking outside on mobile
+    document.addEventListener('click', function(e) {
+        if (window.innerWidth <= 768 && 
+            !sidebar.contains(e.target) && 
+            !sidebarToggle.contains(e.target)) {
+            sidebar.classList.remove('active');
+        }
     });
 }
 
-function showPage(pageName) {
-    console.log('Switching to page:', pageName);
-    
-    // Hide all pages
-    const pages = document.querySelectorAll('.page');
-    pages.forEach(page => page.classList.remove('active'));
-    
+function showPage(pageId) {
+    // Update active menu item
+    menuItems.forEach(item => {
+        item.classList.toggle('active', item.dataset.page === pageId);
+    });
+
     // Show selected page
-    const selectedPage = document.getElementById(`${pageName}-page`);
-    if (selectedPage) {
-        selectedPage.classList.add('active');
-    }
-    
-    // Update navigation
-    const navLinks = document.querySelectorAll('.nav-link');
-    navLinks.forEach(link => link.classList.remove('active'));
-    
-    const activeLink = document.querySelector(`[data-page="${pageName}"]`);
-    if (activeLink) {
-        activeLink.classList.add('active');
-    }
-    
-    // Update page title
-    const titles = {
-        'dashboard': 'Dashboard',
-        'lab-results': 'Lab Results',
-        'medications': 'Medications',
-        'profile': 'Profile'
-    };
-    
-    const titleEl = document.getElementById('page-title');
-    if (titleEl) {
-        titleEl.textContent = titles[pageName] || 'MedSync';
-    }
-    
-    currentPage = pageName;
+    pages.forEach(page => {
+        page.classList.toggle('active', page.id === pageId);
+    });
 
-    // Refresh page content when switching
-    if (pageName === 'medications') {
-        renderMedicationsGrid();
-        // Re-setup modal when switching to medications page
-        setTimeout(() => {
-            setupModal();
-        }, 100);
-    } else if (pageName === 'dashboard') {
-        renderTodaysMedications();
-    } else if (pageName === 'lab-results') {
-        renderAiHistory();
+    appState.currentPage = pageId;
+
+    // Update page content based on current data
+    switch(pageId) {
+        case 'dashboard':
+            updateDashboard();
+            break;
+        case 'medications':
+            updateMedicationsGrid();
+            break;
+        case 'lab-results':
+            updateLabResults();
+            break;
+        case 'family-history':
+            updateFamilyHistory();
+            break;
+        case 'profile':
+            updateProfile();
+            break;
     }
 }
 
-// Dashboard
+// Dashboard Functions
 function initializeDashboard() {
-    console.log('Initializing dashboard...');
-    updateDashboardStats();
-    renderTodaysMedications();
+    updateDashboard();
 }
 
-function updateDashboardStats() {
-    console.log('Updating dashboard stats:', dashboardStats);
-    
-    const lastTestEl = document.getElementById('last-test-date');
-    const aiHealthSummaryEl = document.getElementById('ai-health-summary');
-    const activeMedsEl = document.getElementById('active-meds');
-    const consistencyRateEl = document.getElementById('consistency-rate');
-    
-    if (lastTestEl) lastTestEl.textContent = dashboardStats.lastTestDate;
-    if (aiHealthSummaryEl) aiHealthSummaryEl.textContent = dashboardStats.aiHealthSummary;
-    if (activeMedsEl) activeMedsEl.textContent = dashboardStats.activeMedications;
-    if (consistencyRateEl) consistencyRateEl.textContent = dashboardStats.consistencyRate + '%';
+function updateDashboard() {
+    // Update overview cards
+    document.getElementById('lastTestDate').textContent = appState.dashboardStats.lastTestDate;
+    document.getElementById('activeMedications').textContent = appState.dashboardStats.activeMedications;
+    document.getElementById('consistencyRate').textContent = appState.dashboardStats.consistencyRate + '%';
+
+    // Update AI health summary
+    document.getElementById('aiHealthSummary').textContent = appState.dashboardStats.aiHealthSummary;
+
+    // Update today's medications
+    updateTodaysMedications();
 }
 
-function renderTodaysMedications() {
-    console.log('Rendering today\'s medications...');
-    const container = document.getElementById('today-meds-list');
-    if (!container) return;
+function updateTodaysMedications() {
+    const container = document.getElementById('todaysMedications');
+    const today = new Date().toISOString().split('T')[0];
     
-    const todayMeds = getTodaysMedications();
-    console.log('Today\'s medications:', todayMeds);
+    const todaysMeds = appState.medications.filter(med => med.active);
     
-    if (todayMeds.length === 0) {
-        container.innerHTML = '<p class="text-center" style="color: var(--color-text-secondary); padding: var(--space-20);">No medications scheduled for today.</p>';
+    if (todaysMeds.length === 0) {
+        container.innerHTML = '<p class="text-muted">No medications scheduled for today.</p>';
         return;
     }
-    
-    container.innerHTML = todayMeds.map(med => {
-        const nextDue = new Date(med.nextDue);
-        const now = new Date();
-        const isOverdue = nextDue < now;
-        const isDueSoon = (nextDue - now) <= 30 * 60 * 1000; // 30 minutes
-        
-        let statusClass = 'on-time';
-        if (isOverdue) statusClass = 'overdue';
-        else if (isDueSoon) statusClass = 'due-soon';
-        
-        const isTaken = med.lastTaken && new Date(med.lastTaken).toDateString() === now.toDateString();
-        
+
+    container.innerHTML = todaysMeds.map(med => {
+        const timesDue = med.times.map(time => {
+            const medTime = new Date(`${today}T${time}:00`);
+            const now = new Date();
+            const isOverdue = medTime < now;
+            const isTaken = med.lastTaken && new Date(med.lastTaken).toDateString() === now.toDateString();
+            
+            return {
+                time,
+                isOverdue,
+                isTaken,
+                timeStr: formatTime(time)
+            };
+        });
+
         return `
-            <div class="medication-item ${statusClass}">
+            <div class="medication-item">
                 <div class="medication-info">
                     <h4>${med.name}</h4>
-                    <p>${med.dosage} ${med.unit} - Due at ${formatTime(med.times[0])}</p>
+                    <div class="medication-details">
+                        ${med.dosage} ${med.unit} • ${timesDue.map(t => t.timeStr).join(', ')}
+                    </div>
                 </div>
                 <div class="medication-actions">
-                    <button class="btn ${isTaken ? 'btn--outline' : 'btn--primary'}" 
-                            ${isTaken ? 'disabled' : ''} 
-                            onclick="takeMedication('${med.id}', this)">
-                        ${isTaken ? 'Taken' : 'Take Now'}
+                    <button class="btn btn--sm btn--take" onclick="markMedicationTaken('${med.id}')">
+                        <i class="fas fa-check"></i> Take
                     </button>
-                    <button class="btn btn--outline btn--sm" onclick="remindMedication('${med.id}')">
+                    <button class="btn btn--sm btn--remind" onclick="remindMedication('${med.id}')">
                         <i class="fas fa-bell"></i> Remind
                     </button>
                 </div>
@@ -283,879 +370,985 @@ function renderTodaysMedications() {
     }).join('');
 }
 
-function getTodaysMedications() {
-    const now = new Date();
-    const today = now.toDateString();
-    
-    // For demo purposes, show all active medications as "due today"
-    return medications.filter(med => med.active);
-}
-
-function getMedicationStatus(med) {
-    const now = new Date();
-    const nextDue = new Date(med.nextDue);
-    
-    if (nextDue < now) return 'overdue';
-    if ((nextDue - now) <= 30 * 60 * 1000) return 'due-soon';
-    return 'on-time';
-}
-
-// Lab Results
+// Lab Results Functions
 function initializeLabResults() {
-    console.log('Initializing lab results...');
-    renderCurrentAiSummary();
-    renderAiHistory();
+    updateLabResults();
 }
 
-function renderCurrentAiSummary() {
-    const currentTestTypeEl = document.getElementById('current-test-type');
-    const currentTestDateEl = document.getElementById('current-test-date');
-    const currentAnalysisSummaryEl = document.getElementById('current-analysis-summary');
-    
-    if (currentTestTypeEl && labResults) currentTestTypeEl.textContent = labResults.testType;
-    if (currentTestDateEl && labResults) currentTestDateEl.textContent = formatDate(labResults.date);
-    if (currentAnalysisSummaryEl && labResults) currentAnalysisSummaryEl.textContent = labResults.currentAiSummary;
+function updateLabResults() {
+    // Update current analysis
+    document.getElementById('currentTestType').textContent = appState.labResults.testType;
+    document.getElementById('currentTestDate').textContent = formatDate(appState.labResults.date);
+    document.getElementById('currentAnalysis').textContent = appState.labResults.currentAiSummary;
+
+    // Update analysis history
+    updateAnalysisHistory();
 }
 
-function renderAiHistory() {
-    const container = document.getElementById('ai-history-list');
-    if (!container || !labResults || !labResults.aiSummaryHistory) return;
+function updateAnalysisHistory() {
+    const container = document.getElementById('analysisHistory');
     
-    container.innerHTML = labResults.aiSummaryHistory.map(item => `
-        <div class="ai-history-item">
-            <div class="ai-history-header">
-                <h4>${item.testType}</h4>
-                <span class="ai-history-date">${formatDate(item.date)}</span>
+    container.innerHTML = appState.labResults.aiSummaryHistory.map(item => `
+        <div class="history-item">
+            <div class="history-header">
+                <span class="test-type">${item.testType}</span>
+                <span class="test-date">${formatDate(item.date)}</span>
             </div>
-            <p class="ai-history-summary">${item.summary}</p>
+            <div class="history-summary">${item.summary}</div>
         </div>
     `).join('');
 }
 
-// Medications
-function initializeMedications() {
-    console.log('Initializing medications...');
-    renderMedicationsGrid();
-    setupMedicationForm();
+// File Upload Functions
+function initializeFileUpload() {
+    const uploadZone = document.getElementById('uploadZone');
+    const fileInput = document.getElementById('fileInput');
+    const uploadProgress = document.getElementById('uploadProgress');
+
+    // Click to browse files
+    uploadZone.addEventListener('click', () => {
+        if (!uploadProgress.classList.contains('hidden')) return;
+        fileInput.click();
+    });
+
+    // Drag and drop
+    uploadZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadZone.classList.add('drag-over');
+    });
+
+    uploadZone.addEventListener('dragleave', () => {
+        uploadZone.classList.remove('drag-over');
+    });
+
+    uploadZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadZone.classList.remove('drag-over');
+        
+        const files = Array.from(e.dataTransfer.files);
+        if (files.length > 0 && files[0].type === 'application/pdf') {
+            handleFileUpload(files[0]);
+        } else {
+            showToast('Please upload a PDF file', 'error');
+        }
+    });
+
+    // File input change
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+            handleFileUpload(e.target.files[0]);
+        }
+    });
 }
 
-function renderMedicationsGrid() {
-    console.log('Rendering medications grid...');
-    const container = document.getElementById('medications-grid');
-    if (!container) return;
+function handleFileUpload(file) {
+    const uploadContent = document.querySelector('.upload-content');
+    const uploadProgress = document.getElementById('uploadProgress');
+    const progressFill = document.querySelector('.progress-fill');
+    const progressText = document.querySelector('.progress-text');
+
+    // Show progress
+    uploadContent.style.display = 'none';
+    uploadProgress.classList.remove('hidden');
     
-    const activeMeds = medications.filter(med => med.active);
-    console.log('Active medications:', activeMeds);
+    let progress = 0;
+    const interval = setInterval(() => {
+        progress += Math.random() * 15;
+        if (progress >= 100) {
+            progress = 100;
+            clearInterval(interval);
+            
+            // Simulate AI analysis
+            setTimeout(() => {
+                uploadContent.style.display = 'block';
+                uploadProgress.classList.add('hidden');
+                progressFill.style.width = '0%';
+                
+                showToast('Lab report uploaded and analyzed successfully!', 'success');
+                
+                // Update with new mock analysis
+                const newAnalysis = {
+                    date: new Date().toISOString().split('T')[0],
+                    testType: "Complete Blood Count (CBC)",
+                    summary: "New lab results uploaded. AI analysis shows continued improvement in anemia markers. Iron levels are responding well to current supplementation protocol."
+                };
+                
+                appState.labResults.currentAiSummary = newAnalysis.summary;
+                appState.labResults.date = newAnalysis.date;
+                appState.labResults.aiSummaryHistory.unshift(newAnalysis);
+                
+                updateLabResults();
+            }, 1000);
+        }
+        
+        progressFill.style.width = progress + '%';
+        progressText.textContent = `Uploading... ${Math.round(progress)}%`;
+    }, 200);
+}
+
+// Medications Functions
+function initializeMedications() {
+    updateMedicationsGrid();
+    initializeAddMedicationModal();
+}
+
+function updateMedicationsGrid() {
+    const grid = document.getElementById('medicationsGrid');
     
-    if (activeMeds.length === 0) {
-        container.innerHTML = '<p class="text-center" style="color: var(--color-text-secondary); padding: var(--space-20); grid-column: 1/-1;">No medications added yet.</p>';
+    if (appState.medications.length === 0) {
+        grid.innerHTML = '<p class="text-muted">No medications added yet.</p>';
         return;
     }
-    
-    container.innerHTML = activeMeds.map(med => {
-        const status = getMedicationStatus(med);
-        const nextDue = new Date(med.nextDue);
-        const isTaken = med.lastTaken && new Date(med.lastTaken).toDateString() === new Date().toDateString();
-        
-        return `
-            <div class="medication-card ${status}">
-                <div class="medication-header">
-                    <h4>${med.name}</h4>
-                    <p class="medication-dosage">${med.dosage} ${med.unit}</p>
-                    <p class="medication-schedule">${formatFrequency(med.frequency)} at ${med.times.map(formatTime).join(', ')}</p>
+
+    grid.innerHTML = appState.medications.map(med => `
+        <div class="medication-card">
+            <div class="medication-header">
+                <div>
+                    <h3 class="medication-name">${med.name}</h3>
+                    <p class="medication-dosage">${med.dosage} ${med.unit} • ${getFrequencyText(med.frequency)}</p>
                 </div>
-                
-                <div class="consistency-section">
-                    <div class="consistency-label">
-                        <span>Consistency</span>
-                        <span>${med.consistencyRate}%</span>
+                <span class="medication-status ${med.active ? 'active' : 'inactive'}">
+                    ${med.active ? 'Active' : 'Inactive'}
+                </span>
+            </div>
+            
+            <div class="medication-schedule">
+                ${med.times.map(time => `
+                    <div class="schedule-item">
+                        <span class="schedule-time">${formatTime(time)}</span>
+                        <span class="schedule-taken text-success">
+                            ${isTimePassedToday(time) ? '✓' : ''}
+                        </span>
                     </div>
-                    <div class="consistency-bar">
-                        <div class="consistency-fill" style="width: ${med.consistencyRate}%"></div>
-                    </div>
+                `).join('')}
+            </div>
+            
+            <div class="consistency-rate">
+                <div class="consistency-label">
+                    <span>Consistency Rate</span>
+                    <span class="fw-medium">${med.consistencyRate}%</span>
                 </div>
-                
-                <div class="next-dose">
-                    <strong>Next dose:</strong> ${formatDateTime(nextDue)}
-                </div>
-                
-                <div class="medication-card-actions">
-                    <button class="btn ${isTaken ? 'btn--outline' : 'btn--primary'} btn--sm" 
-                            ${isTaken ? 'disabled' : ''} 
-                            onclick="takeMedication('${med.id}', this)">
-                        ${isTaken ? 'Taken' : 'Take Now'}
-                    </button>
-                    <button class="btn btn--outline btn--sm" onclick="remindMedication('${med.id}')">
-                        <i class="fas fa-bell"></i> Remind
-                    </button>
-                    <button class="btn btn--outline btn--sm" onclick="deleteMedication('${med.id}')">
-                        <i class="fas fa-trash"></i> Delete
-                    </button>
+                <div class="consistency-bar">
+                    <div class="consistency-fill" style="width: ${med.consistencyRate}%"></div>
                 </div>
             </div>
-        `;
-    }).join('');
-}
-
-function takeMedication(medId, button) {
-    console.log('Taking medication:', medId);
-    const med = medications.find(m => m.id === medId);
-    if (!med) return;
-    
-    // Update medication record
-    med.lastTaken = new Date().toISOString();
-    
-    // Calculate next due time
-    const now = new Date();
-    const nextDue = new Date(med.nextDue);
-    
-    switch (med.frequency) {
-        case 'once_daily':
-            nextDue.setDate(nextDue.getDate() + 1);
-            break;
-        case 'twice_daily':
-            nextDue.setHours(nextDue.getHours() + 12);
-            break;
-        case 'three_times_daily':
-            nextDue.setHours(nextDue.getHours() + 8);
-            break;
-    }
-    
-    med.nextDue = nextDue.toISOString();
-    
-    // Update button
-    if (button) {
-        button.textContent = 'Taken';
-        button.classList.remove('btn--primary');
-        button.classList.add('btn--outline');
-        button.disabled = true;
-    }
-    
-    // Update consistency (simplified calculation)
-    med.consistencyRate = Math.min(100, med.consistencyRate + 2);
-    
-    // Refresh displays
-    if (currentPage === 'medications') {
-        renderMedicationsGrid();
-    }
-    
-    if (currentPage === 'dashboard') {
-        renderTodaysMedications();
-        updateDashboardStats();
-    }
-    
-    showToast('Medication marked as taken!', 'success');
-}
-
-function remindMedication(medId) {
-    const med = medications.find(m => m.id === medId);
-    if (!med) return;
-    
-    // Show reminder notification
-    showToast(`Reminder set for ${med.name}! You'll be notified 15 minutes before your next dose.`, 'info');
-    
-    // In a real app, this would set up an actual notification
-    console.log('Reminder set for medication:', med.name);
-}
-
-function deleteMedication(medId) {
-    console.log('Attempting to delete medication with ID:', medId);
-    
-    const med = medications.find(m => m.id === medId);
-    if (!med) {
-        console.error('Medication not found with ID:', medId);
-        showToast('Error: Medication not found.', 'error');
-        return;
-    }
-    
-    // Show confirmation modal
-    showConfirmationModal(
-        'Delete Medication',
-        `Are you sure you want to delete ${med.name}? This action cannot be undone.`,
-        () => {
-            // Confirmed - proceed with deletion
-            const index = medications.findIndex(m => m.id === medId);
-            console.log('Found medication at index:', index);
             
-            if (index !== -1) {
-                // Mark as inactive instead of removing from array
-                medications[index].active = false;
-                console.log('Marked medication as inactive:', medications[index]);
-                
-                // Update active medication count
-                const activeMedicationCount = medications.filter(m => m.active).length;
-                dashboardStats.activeMedications = activeMedicationCount;
-                console.log('Updated active medication count:', activeMedicationCount);
-                
-                // Refresh all displays
-                if (currentPage === 'medications') {
-                    renderMedicationsGrid();
-                }
-                
-                if (currentPage === 'dashboard') {
-                    renderTodaysMedications();
-                    updateDashboardStats();
-                }
-                
-                showToast(`${med.name} deleted successfully!`, 'success');
-            } else {
-                console.error('Medication not found with ID:', medId);
-                showToast('Error: Medication not found.', 'error');
-            }
-        }
-    );
-}
-
-// Confirmation Modal Functions
-function showConfirmationModal(title, message, onConfirm) {
-    const modal = document.getElementById('confirmation-modal');
-    const titleEl = document.getElementById('confirmation-title');
-    const messageEl = document.getElementById('confirmation-message');
-    const confirmBtn = document.getElementById('confirmation-confirm-btn');
-    const cancelBtn = document.getElementById('confirmation-cancel-btn');
-    const closeBtn = document.getElementById('confirmation-close-btn');
-    const overlay = modal.querySelector('.modal-overlay');
-    
-    if (!modal || !titleEl || !messageEl || !confirmBtn || !cancelBtn) {
-        console.error('Confirmation modal elements not found');
-        return;
-    }
-    
-    // Set content
-    titleEl.textContent = title;
-    messageEl.textContent = message;
-    
-    // Show modal
-    modal.classList.remove('hidden');
-    
-    // Set up event listeners
-    function hideModal() {
-        modal.classList.add('hidden');
-        // Clean up event listeners
-        confirmBtn.removeEventListener('click', confirmHandler);
-        cancelBtn.removeEventListener('click', hideModal);
-        if (closeBtn) closeBtn.removeEventListener('click', hideModal);
-        if (overlay) overlay.removeEventListener('click', hideModal);
-    }
-    
-    function confirmHandler() {
-        hideModal();
-        if (onConfirm) onConfirm();
-    }
-    
-    confirmBtn.addEventListener('click', confirmHandler);
-    cancelBtn.addEventListener('click', hideModal);
-    if (closeBtn) closeBtn.addEventListener('click', hideModal);
-    if (overlay) overlay.addEventListener('click', hideModal);
-}
-
-// Profile
-function initializeProfile() {
-    console.log('Initializing profile...');
-    populateProfileForm();
-    setupProfileForm();
-}
-
-function populateProfileForm() {
-    console.log('Populating profile form...');
-    
-    // Basic information
-    const profileNameEl = document.getElementById('profile-name');
-    const profileAgeEl = document.getElementById('profile-age');
-    const profileHeightEl = document.getElementById('profile-height');
-    const profileWeightEl = document.getElementById('profile-weight');
-    const profileGenderEl = document.getElementById('profile-gender');
-    const profileBloodTypeEl = document.getElementById('profile-blood-type');
-    
-    if (profileNameEl) profileNameEl.value = userProfile.name || '';
-    if (profileAgeEl) profileAgeEl.value = userProfile.age || '';
-    if (profileHeightEl) profileHeightEl.value = userProfile.height || '';
-    if (profileWeightEl) profileWeightEl.value = userProfile.weight || '';
-    if (profileGenderEl) profileGenderEl.value = userProfile.gender || '';
-    if (profileBloodTypeEl) profileBloodTypeEl.value = userProfile.bloodType || '';
-    
-    // Emergency contact
-    const emergencyNameEl = document.getElementById('emergency-name');
-    const emergencyRelationEl = document.getElementById('emergency-relation');
-    const emergencyPhoneEl = document.getElementById('emergency-phone');
-    
-    if (emergencyNameEl && userProfile.emergencyContact) emergencyNameEl.value = userProfile.emergencyContact.name || '';
-    if (emergencyRelationEl && userProfile.emergencyContact) emergencyRelationEl.value = userProfile.emergencyContact.relation || '';
-    if (emergencyPhoneEl && userProfile.emergencyContact) emergencyPhoneEl.value = userProfile.emergencyContact.phone || '';
-    
-    // Notification preferences
-    const emailRemindersEl = document.getElementById('email-reminders');
-    const pushNotificationsEl = document.getElementById('push-notifications');
-    const soundAlertsEl = document.getElementById('sound-alerts');
-    
-    if (emailRemindersEl && userProfile.notificationPreferences) emailRemindersEl.checked = userProfile.notificationPreferences.emailReminders || false;
-    if (pushNotificationsEl && userProfile.notificationPreferences) pushNotificationsEl.checked = userProfile.notificationPreferences.pushNotifications || false;
-    if (soundAlertsEl && userProfile.notificationPreferences) soundAlertsEl.checked = userProfile.notificationPreferences.soundAlerts || false;
-    
-    // Populate tags
-    renderTags('conditions', userProfile.conditions || []);
-    renderTags('allergies', userProfile.allergies || []);
-}
-
-function renderTags(type, tags) {
-    const container = document.getElementById(`${type}-container`);
-    if (!container) return;
-    
-    container.innerHTML = tags.map(tag => `
-        <span class="tag">
-            ${tag}
-            <button type="button" class="tag-remove" onclick="removeTag('${type}', '${tag}')">×</button>
-        </span>
+            <div class="medication-card-actions">
+                <button class="btn btn--sm btn--take" onclick="markMedicationTaken('${med.id}')">
+                    <i class="fas fa-check"></i> Take
+                </button>
+                <button class="btn btn--sm btn--remind" onclick="remindMedication('${med.id}')">
+                    <i class="fas fa-bell"></i> Remind
+                </button>
+                <button class="btn btn--sm btn--icon btn--delete" onclick="deleteMedication('${med.id}')">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        </div>
     `).join('');
 }
 
-function removeTag(type, tag) {
-    if (type === 'conditions') {
-        userProfile.conditions = userProfile.conditions.filter(c => c !== tag);
-        renderTags('conditions', userProfile.conditions);
-    } else if (type === 'allergies') {
-        userProfile.allergies = userProfile.allergies.filter(a => a !== tag);
-        renderTags('allergies', userProfile.allergies);
-    }
-}
+function initializeAddMedicationModal() {
+    const addBtn = document.getElementById('addMedicationBtn');
+    const modal = document.getElementById('addMedicationModal');
+    const closeBtn = document.getElementById('closeMedicationModal');
+    const cancelBtn = document.getElementById('cancelMedicationModal');
+    const saveBtn = document.getElementById('saveMedicationBtn');
+    const form = document.getElementById('addMedicationForm');
+    const frequencySelect = document.getElementById('medicationFrequency');
 
-function setupProfileForm() {
-    // Tag inputs
-    setupTagInput('conditions');
-    setupTagInput('allergies');
-    
-    // Form submission
-    const profileForm = document.getElementById('profile-form');
-    if (profileForm) {
-        profileForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            saveProfile();
-        });
-    }
-}
-
-function setupTagInput(type) {
-    const input = document.getElementById(`${type}-input`);
-    if (!input) return;
-    
-    input.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            const value = this.value.trim();
-            if (value) {
-                addTag(type, value);
-                this.value = '';
-            }
-        }
-    });
-}
-
-function addTag(type, value) {
-    if (type === 'conditions') {
-        if (!userProfile.conditions) userProfile.conditions = [];
-        if (!userProfile.conditions.includes(value)) {
-            userProfile.conditions.push(value);
-            renderTags('conditions', userProfile.conditions);
-        }
-    } else if (type === 'allergies') {
-        if (!userProfile.allergies) userProfile.allergies = [];
-        if (!userProfile.allergies.includes(value)) {
-            userProfile.allergies.push(value);
-            renderTags('allergies', userProfile.allergies);
-        }
-    }
-}
-
-function saveProfile() {
-    const form = document.getElementById('profile-form');
-    if (!form) return;
-    
-    const submitBtn = form.querySelector('button[type="submit"]');
-    const btnText = submitBtn.querySelector('.btn-text');
-    const btnLoader = submitBtn.querySelector('.btn-loader');
-    
-    // Show loading state
-    if (btnText) btnText.textContent = 'Saving...';
-    if (btnLoader) btnLoader.classList.remove('hidden');
-    if (submitBtn) submitBtn.disabled = true;
-    
-    // Simulate API call
-    setTimeout(() => {
-        // Update user profile
-        const profileNameEl = document.getElementById('profile-name');
-        const profileAgeEl = document.getElementById('profile-age');
-        const profileHeightEl = document.getElementById('profile-height');
-        const profileWeightEl = document.getElementById('profile-weight');
-        const profileGenderEl = document.getElementById('profile-gender');
-        const profileBloodTypeEl = document.getElementById('profile-blood-type');
-        const emergencyNameEl = document.getElementById('emergency-name');
-        const emergencyRelationEl = document.getElementById('emergency-relation');
-        const emergencyPhoneEl = document.getElementById('emergency-phone');
-        const emailRemindersEl = document.getElementById('email-reminders');
-        const pushNotificationsEl = document.getElementById('push-notifications');
-        const soundAlertsEl = document.getElementById('sound-alerts');
-        
-        if (profileNameEl) userProfile.name = profileNameEl.value;
-        if (profileAgeEl) userProfile.age = parseInt(profileAgeEl.value) || 0;
-        if (profileHeightEl) userProfile.height = profileHeightEl.value;
-        if (profileWeightEl) userProfile.weight = profileWeightEl.value;
-        if (profileGenderEl) userProfile.gender = profileGenderEl.value;
-        if (profileBloodTypeEl) userProfile.bloodType = profileBloodTypeEl.value;
-        
-        userProfile.emergencyContact = {
-            name: emergencyNameEl ? emergencyNameEl.value : '',
-            relation: emergencyRelationEl ? emergencyRelationEl.value : '',
-            phone: emergencyPhoneEl ? emergencyPhoneEl.value : ''
-        };
-        
-        userProfile.notificationPreferences = {
-            emailReminders: emailRemindersEl ? emailRemindersEl.checked : false,
-            pushNotifications: pushNotificationsEl ? pushNotificationsEl.checked : false,
-            soundAlerts: soundAlertsEl ? soundAlertsEl.checked : false
-        };
-        
-        // Update header name
-        const userNameEl = document.getElementById('user-name');
-        if (userNameEl && userProfile.name) {
-            userNameEl.textContent = userProfile.name.split(' ')[0];
-        }
-        
-        // Reset button state
-        if (btnText) btnText.textContent = 'Save Profile';
-        if (btnLoader) btnLoader.classList.add('hidden');
-        if (submitBtn) submitBtn.disabled = false;
-        
-        showToast('Profile saved successfully!', 'success');
-    }, 1500);
-}
-
-// File Upload
-function setupFileUploads() {
-    console.log('Setting up file uploads...');
-    
-    // Lab results upload only
-    setupFileUpload('lab-upload-zone', 'lab-file-input', 'lab-upload-btn', 'lab-upload-progress', 'lab-progress-fill');
-}
-
-function setupFileUpload(zoneId, inputId, btnId, progressId, progressFillId) {
-    const zone = document.getElementById(zoneId);
-    const input = document.getElementById(inputId);
-    const btn = document.getElementById(btnId);
-    
-    if (!zone || !input || !btn) {
-        console.log('File upload elements not found:', zoneId, inputId, btnId);
-        return;
-    }
-    
-    console.log('Setting up file upload for:', zoneId);
-    
-    // Button click
-    btn.addEventListener('click', function(e) {
-        e.preventDefault();
-        console.log('Upload button clicked');
-        input.click();
-    });
-    
-    // File selection
-    input.addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (file) {
-            console.log('File selected:', file.name);
-            handleFileUpload(file, progressId, progressFillId);
-        }
-    });
-    
-    // Drag and drop
-    zone.addEventListener('dragover', function(e) {
-        e.preventDefault();
-        this.classList.add('dragover');
-    });
-    
-    zone.addEventListener('dragleave', function() {
-        this.classList.remove('dragover');
-    });
-    
-    zone.addEventListener('drop', function(e) {
-        e.preventDefault();
-        this.classList.remove('dragover');
-        
-        const file = e.dataTransfer.files[0];
-        if (file) {
-            console.log('File dropped:', file.name);
-            handleFileUpload(file, progressId, progressFillId);
-        }
-    });
-    
-    // Make zone clickable
-    zone.addEventListener('click', function(e) {
-        if (e.target === zone || e.target.tagName === 'I' || e.target.tagName === 'P') {
-            input.click();
-        }
-    });
-}
-
-function handleFileUpload(file, progressId, progressFillId) {
-    console.log('Handling file upload:', file.name, file.type);
-    
-    // Validate file type
-    if (file.type !== 'application/pdf') {
-        showToast('Please upload PDF files only.', 'error');
-        return;
-    }
-    
-    // Show progress
-    const progressContainer = progressId ? document.getElementById(progressId) : null;
-    const progressFill = progressFillId ? document.getElementById(progressFillId) : null;
-    
-    if (progressContainer && progressFill) {
-        progressContainer.classList.remove('hidden');
-        
-        // Simulate upload progress
-        let progress = 0;
-        const interval = setInterval(() => {
-            progress += Math.random() * 20;
-            if (progress >= 100) {
-                progress = 100;
-                clearInterval(interval);
-                setTimeout(() => {
-                    progressContainer.classList.add('hidden');
-                    
-                    // Generate new AI summary for the uploaded report
-                    const newSummary = "New analysis from uploaded report shows continued improvement in overall health markers. Blood work indicates positive response to current treatment plan. Consistency with medication schedule is key to maintaining these positive trends.";
-                    
-                    // Update current AI summary
-                    labResults.currentAiSummary = newSummary;
-                    labResults.date = new Date().toISOString().split('T')[0];
-                    
-                    // Add to history
-                    labResults.aiSummaryHistory.unshift({
-                        date: labResults.date,
-                        testType: "Complete Blood Count (CBC)",
-                        summary: newSummary
-                    });
-                    
-                    // Update dashboard
-                    dashboardStats.lastTestDate = formatDate(labResults.date);
-                    dashboardStats.aiHealthSummary = newSummary;
-                    
-                    // Refresh displays
-                    if (currentPage === 'lab-results') {
-                        renderCurrentAiSummary();
-                        renderAiHistory();
-                    }
-                    if (currentPage === 'dashboard') {
-                        updateDashboardStats();
-                    }
-                    
-                    showToast('Lab report uploaded and AI analysis generated successfully!', 'success');
-                }, 1000);
-            }
-            progressFill.style.width = progress + '%';
-        }, 200);
-    } else {
-        // Generate new AI summary for the uploaded report
-        const newSummary = "New analysis from uploaded report shows continued improvement in overall health markers. Blood work indicates positive response to current treatment plan. Consistency with medication schedule is key to maintaining these positive trends.";
-        
-        // Update current AI summary
-        labResults.currentAiSummary = newSummary;
-        labResults.date = new Date().toISOString().split('T')[0];
-        
-        // Add to history
-        labResults.aiSummaryHistory.unshift({
-            date: labResults.date,
-            testType: "Complete Blood Count (CBC)",
-            summary: newSummary
-        });
-        
-        // Update dashboard
-        dashboardStats.lastTestDate = formatDate(labResults.date);
-        dashboardStats.aiHealthSummary = newSummary;
-        
-        // Refresh displays
-        if (currentPage === 'lab-results') {
-            renderCurrentAiSummary();
-            renderAiHistory();
-        }
-        if (currentPage === 'dashboard') {
-            updateDashboardStats();
-        }
-        
-        showToast('Lab report uploaded and AI analysis generated successfully!', 'success');
-    }
-}
-
-// Modal Management
-function setupModal() {
-    console.log('Setting up modal...');
-    
-    const modal = document.getElementById('add-medication-modal');
-    const addBtn = document.getElementById('add-medication-btn');
-    
-    if (!modal) {
-        console.log('Modal element not found');
-        return;
-    }
-    
-    if (!addBtn) {
-        console.log('Add medication button not found');
-        return;
-    }
-    
-    console.log('Modal elements found, setting up event listeners');
-    
-    // Remove existing event listeners to prevent duplicates
-    const newAddBtn = addBtn.cloneNode(true);
-    addBtn.parentNode.replaceChild(newAddBtn, addBtn);
-    
-    // Show modal
-    newAddBtn.addEventListener('click', function(e) {
-        e.preventDefault();
-        console.log('Add medication button clicked - showing modal');
-        showMedicationModal();
-    });
-    
-    // Set up other modal controls
-    const closeBtn = document.getElementById('modal-close-btn');
-    const cancelBtn = document.getElementById('modal-cancel-btn');
-    const overlay = modal.querySelector('.modal-overlay');
-    
-    if (closeBtn) {
-        closeBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            hideMedicationModal();
-        });
-    }
-    
-    if (cancelBtn) {
-        cancelBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            hideMedicationModal();
-        });
-    }
-    
-    if (overlay) {
-        overlay.addEventListener('click', hideMedicationModal);
-    }
-    
-    // Frequency change handler
-    const freqSelect = document.getElementById('med-frequency');
-    if (freqSelect) {
-        freqSelect.addEventListener('change', updateTimeInputs);
-    }
-    
-    // Form submission
-    const form = document.getElementById('medication-form');
-    if (form) {
-        // Remove existing listeners
-        const newForm = form.cloneNode(true);
-        form.parentNode.replaceChild(newForm, form);
-        
-        newForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            console.log('Medication form submitted');
-            addMedication();
-        });
-    }
-}
-
-function showMedicationModal() {
-    console.log('Showing medication modal');
-    const modal = document.getElementById('add-medication-modal');
-    if (modal) {
+    addBtn.addEventListener('click', () => {
         modal.classList.remove('hidden');
-        resetMedicationForm();
-    }
-}
-
-function hideMedicationModal() {
-    console.log('Hiding medication modal');
-    const modal = document.getElementById('add-medication-modal');
-    if (modal) {
-        modal.classList.add('hidden');
-    }
-}
-
-function resetMedicationForm() {
-    const form = document.getElementById('medication-form');
-    if (form) {
         form.reset();
         updateTimeInputs();
-    }
+    });
+
+    [closeBtn, cancelBtn].forEach(btn => {
+        btn.addEventListener('click', () => {
+            modal.classList.add('hidden');
+        });
+    });
+
+    modal.querySelector('.modal-overlay').addEventListener('click', () => {
+        modal.classList.add('hidden');
+    });
+
+    frequencySelect.addEventListener('change', updateTimeInputs);
+
+    saveBtn.addEventListener('click', saveMedication);
 }
 
 function updateTimeInputs() {
-    const freqSelect = document.getElementById('med-frequency');
-    const container = document.getElementById('time-inputs');
-    const timesGroup = document.getElementById('times-group');
-    
-    if (!freqSelect || !container || !timesGroup) return;
-    
-    const frequency = freqSelect.value;
-    
-    if (frequency === 'as_needed') {
-        timesGroup.style.display = 'none';
-        return;
-    }
-    
-    timesGroup.style.display = 'block';
+    const frequency = document.getElementById('medicationFrequency').value;
+    const container = document.getElementById('timeInputs');
     
     const timeCount = {
         'once_daily': 1,
         'twice_daily': 2,
-        'three_times_daily': 3
-    }[frequency] || 1;
-    
-    const defaultTimes = {
-        1: ['08:00'],
-        2: ['08:00', '20:00'],
-        3: ['08:00', '14:00', '20:00']
-    }[timeCount];
+        'three_times_daily': 3,
+        'four_times_daily': 4,
+        'as_needed': 1
+    };
+
+    const count = timeCount[frequency] || 1;
     
     container.innerHTML = '';
-    
-    for (let i = 0; i < timeCount; i++) {
-        const timeGroup = document.createElement('div');
-        timeGroup.className = 'time-input-group';
-        
-        timeGroup.innerHTML = `
-            <input type="time" class="form-control" name="time-${i}" value="${defaultTimes[i]}" required>
-            ${timeCount > 1 ? `<button type="button" class="remove-time" onclick="removeTimeInput(this)"><i class="fas fa-times"></i></button>` : ''}
-        `;
-        
-        container.appendChild(timeGroup);
+    for (let i = 0; i < count; i++) {
+        const input = document.createElement('input');
+        input.type = 'time';
+        input.className = 'form-control time-input';
+        input.required = true;
+        container.appendChild(input);
     }
 }
 
-function removeTimeInput(button) {
-    button.parentElement.remove();
-}
+function saveMedication() {
+    const form = document.getElementById('addMedicationForm');
+    const formData = new FormData(form);
+    
+    const name = document.getElementById('medicationName').value.trim();
+    const dosage = parseFloat(document.getElementById('medicationDosage').value);
+    const unit = document.getElementById('medicationUnit').value;
+    const frequency = document.getElementById('medicationFrequency').value;
+    const instructions = document.getElementById('medicationInstructions').value.trim();
+    const withFood = document.getElementById('medicationWithFood').checked;
+    
+    const times = Array.from(document.querySelectorAll('.time-input')).map(input => input.value).filter(time => time);
+    
+    if (!name || !dosage || times.length === 0) {
+        showToast('Please fill in all required fields', 'error');
+        return;
+    }
 
-function addMedication() {
-    console.log('Adding new medication...');
-    
-    const form = document.getElementById('medication-form');
-    if (!form) return;
-    
-    // Collect time inputs
-    const timeInputs = form.querySelectorAll('input[type="time"]');
-    const times = Array.from(timeInputs).map(input => input.value);
-    
-    const medNameEl = document.getElementById('med-name');
-    const medDosageEl = document.getElementById('med-dosage');
-    const medUnitEl = document.getElementById('med-unit');
-    const medFrequencyEl = document.getElementById('med-frequency');
-    const medInstructionsEl = document.getElementById('med-instructions');
-    const medWithFoodEl = document.getElementById('med-with-food');
-    
-    if (!medNameEl || !medDosageEl || !medUnitEl || !medFrequencyEl) {
-        console.log('Required form elements not found');
-        return;
-    }
-    
-    if (!medNameEl.value || !medDosageEl.value || !medUnitEl.value || !medFrequencyEl.value) {
-        showToast('Please fill in all required fields.', 'error');
-        return;
-    }
-    
-    const newMed = {
+    const newMedication = {
         id: 'med' + Date.now(),
-        name: medNameEl.value,
-        dosage: parseInt(medDosageEl.value),
-        unit: medUnitEl.value,
-        frequency: medFrequencyEl.value,
-        times: times,
-        instructions: medInstructionsEl ? medInstructionsEl.value : '',
-        withFood: medWithFoodEl ? medWithFoodEl.checked : false,
+        name,
+        dosage,
+        unit,
+        frequency,
+        times,
+        instructions,
+        withFood,
         active: true,
-        consistencyRate: 100,
+        consistencyRate: 0,
         lastTaken: null,
-        nextDue: calculateNextDue(times[0] || '08:00', medFrequencyEl.value),
-        createdAt: new Date().toISOString()
+        nextDue: calculateNextDue(times[0])
     };
+
+    appState.medications.push(newMedication);
+    appState.dashboardStats.activeMedications = appState.medications.filter(med => med.active).length;
     
-    console.log('New medication:', newMed);
+    updateMedicationsGrid();
+    updateTodaysMedications();
+    updateDashboard();
     
-    medications.push(newMed);
+    document.getElementById('addMedicationModal').classList.add('hidden');
+    showToast('Medication added successfully!', 'success');
+}
+
+// Family History Functions
+function initializeFamilyHistory() {
+    initializeAddFamilyMemberModal();
+    initializeFamilyMemberDetailsModal();
+    updateFamilyHistory();
+}
+
+function updateFamilyHistory() {
+    updateGeneticWarnings();
+    updateFamilyGrid();
+}
+
+function updateGeneticWarnings() {
+    const container = document.getElementById('geneticWarnings');
     
-    // Update dashboard stats
-    dashboardStats.activeMedications = medications.filter(m => m.active).length;
-    
-    // Refresh displays
-    renderMedicationsGrid();
-    if (currentPage === 'dashboard') {
-        renderTodaysMedications();
-        updateDashboardStats();
+    if (appState.riskAssessments.length === 0) {
+        container.innerHTML = '';
+        return;
     }
-    
-    // Hide modal
-    hideMedicationModal();
-    
-    showToast(`${newMed.name} added successfully!`, 'success');
+
+    container.innerHTML = appState.riskAssessments.map(risk => `
+        <div class="genetic-warning genetic-warning--${risk.riskLevel}">
+            <div class="warning-icon">
+                <i class="fas ${getRiskIcon(risk.riskLevel)}"></i>
+            </div>
+            <div class="warning-content">
+                <h4>${risk.condition} - ${risk.riskLevel.toUpperCase()} RISK</h4>
+                <div class="warning-details">${risk.inheritancePattern}</div>
+                <div class="family-affected">
+                    <strong>Affected family members:</strong> ${risk.familyMembers.join(', ')}
+                </div>
+                <div class="warning-recommendation">
+                    <strong>Recommendation:</strong> ${risk.recommendation}
+                </div>
+            </div>
+        </div>
+    `).join('');
 }
 
-function calculateNextDue(time, frequency) {
-    const now = new Date();
-    const [hours, minutes] = time.split(':').map(Number);
+function updateFamilyGrid() {
+    const grid = document.getElementById('familyGrid');
     
-    const nextDue = new Date();
-    nextDue.setHours(hours, minutes, 0, 0);
-    
-    // If the time has passed today, set for tomorrow
-    if (nextDue <= now) {
-        nextDue.setDate(nextDue.getDate() + 1);
+    if (appState.familyMembers.length === 0) {
+        grid.innerHTML = '<p class="text-muted">No family members added yet.</p>';
+        return;
     }
-    
-    return nextDue.toISOString();
+
+    grid.innerHTML = appState.familyMembers.map(member => `
+        <div class="family-member-card" onclick="showFamilyMemberDetails('${member.id}')">
+            <div class="family-status ${member.status}">${member.status}</div>
+            
+            <div class="family-header">
+                <div class="family-avatar">
+                    <i class="${member.profileImage}"></i>
+                </div>
+                <div class="family-info">
+                    <h3>${member.name}</h3>
+                    <div class="family-relationship">${member.relationship}</div>
+                    <div class="family-age-status">Age: ${member.age} • ${member.status}</div>
+                </div>
+            </div>
+
+            ${member.conditions.length > 0 ? `
+                <div class="family-conditions">
+                    <h4>Medical Conditions</h4>
+                    <div class="conditions-list">
+                        ${member.conditions.map(condition => `
+                            <span class="condition-tag ${isGeneticRiskCondition(condition) ? 'genetic-risk' : ''}">
+                                ${condition}
+                            </span>
+                        `).join('')}
+                    </div>
+                </div>
+            ` : ''}
+
+            ${member.allergies.length > 0 ? `
+                <div class="family-allergies">
+                    <h4>Allergies</h4>
+                    <div class="allergies-list">
+                        ${member.allergies.map(allergy => `
+                            <span class="allergy-tag">${allergy}</span>
+                        `).join('')}
+                    </div>
+                </div>
+            ` : ''}
+
+            <div class="family-member-actions">
+                <button class="btn btn--sm btn--secondary" onclick="event.stopPropagation(); editFamilyMember('${member.id}')">
+                    <i class="fas fa-edit"></i> Edit
+                </button>
+                <button class="btn btn--sm btn--icon btn--delete" onclick="event.stopPropagation(); deleteFamilyMember('${member.id}')">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        </div>
+    `).join('');
 }
 
-function setupMedicationForm() {
-    // This function is called from initializeMedications
-    // Modal setup is handled separately in setupModal
+function initializeAddFamilyMemberModal() {
+    const addBtn = document.getElementById('addFamilyMemberBtn');
+    const modal = document.getElementById('addFamilyMemberModal');
+    const closeBtn = document.getElementById('closeFamilyMemberModal');
+    const cancelBtn = document.getElementById('cancelFamilyMemberModal');
+    const saveBtn = document.getElementById('saveFamilyMemberBtn');
+
+    addBtn.addEventListener('click', () => {
+        appState.editingFamilyMember = null;
+        resetFamilyMemberForm();
+        document.getElementById('familyModalTitle').textContent = 'Add Family Member';
+        modal.classList.remove('hidden');
+    });
+
+    [closeBtn, cancelBtn].forEach(btn => {
+        btn.addEventListener('click', () => {
+            modal.classList.add('hidden');
+        });
+    });
+
+    modal.querySelector('.modal-overlay').addEventListener('click', () => {
+        modal.classList.add('hidden');
+    });
+
+    saveBtn.addEventListener('click', saveFamilyMember);
 }
 
-// Toast Notifications
-function showToast(message, type = 'info') {
-    console.log('Showing toast:', message, type);
-    
-    const container = document.getElementById('toast-container');
-    if (!container) return;
-    
-    const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
-    
-    const icons = {
-        success: 'fas fa-check-circle',
-        error: 'fas fa-exclamation-circle',
-        info: 'fas fa-info-circle'
-    };
-    
-    toast.innerHTML = `
-        <i class="toast-icon ${icons[type]}"></i>
-        <div class="toast-message">${message}</div>
-    `;
-    
-    container.appendChild(toast);
-    
-    // Auto remove after 4 seconds
-    setTimeout(() => {
-        if (toast.parentNode) {
-            toast.remove();
+function initializeFamilyMemberDetailsModal() {
+    const modal = document.getElementById('familyMemberDetailsModal');
+    const closeBtn = document.getElementById('closeFamilyDetailsModal');
+    const closeBtn2 = document.getElementById('closeFamilyDetailsBtn');
+    const editBtn = document.getElementById('editFamilyMemberBtn');
+
+    [closeBtn, closeBtn2].forEach(btn => {
+        btn.addEventListener('click', () => {
+            modal.classList.add('hidden');
+        });
+    });
+
+    modal.querySelector('.modal-overlay').addEventListener('click', () => {
+        modal.classList.add('hidden');
+    });
+
+    editBtn.addEventListener('click', () => {
+        if (appState.currentFamilyMember) {
+            modal.classList.add('hidden');
+            editFamilyMember(appState.currentFamilyMember.id);
         }
-    }, 4000);
+    });
+}
+
+function showFamilyMemberDetails(memberId) {
+    const member = appState.familyMembers.find(m => m.id === memberId);
+    if (!member) return;
+
+    appState.currentFamilyMember = member;
+    const modal = document.getElementById('familyMemberDetailsModal');
+    const title = document.getElementById('familyDetailsTitle');
+    const content = document.getElementById('familyDetailsContent');
+
+    title.textContent = `${member.name} - Family Details`;
+
+    const geneticConditions = member.conditions.filter(condition => isGeneticRiskCondition(condition));
+
+    content.innerHTML = `
+        <div class="family-detail-section">
+            <h4>Personal Information</h4>
+            <div class="family-detail-info">
+                <div class="family-detail-item">
+                    <div class="family-detail-label">Full Name</div>
+                    <div class="family-detail-value">${member.name}</div>
+                </div>
+                <div class="family-detail-item">
+                    <div class="family-detail-label">Relationship</div>
+                    <div class="family-detail-value">${member.relationship}</div>
+                </div>
+                <div class="family-detail-item">
+                    <div class="family-detail-label">Age</div>
+                    <div class="family-detail-value">${member.age} years</div>
+                </div>
+                <div class="family-detail-item">
+                    <div class="family-detail-label">Status</div>
+                    <div class="family-detail-value">${member.status}</div>
+                </div>
+            </div>
+        </div>
+
+        ${member.conditions.length > 0 ? `
+            <div class="family-detail-section">
+                <h4>Medical Conditions</h4>
+                <div class="family-detail-list">
+                    ${member.conditions.map(condition => `
+                        <span class="family-detail-tag ${isGeneticRiskCondition(condition) ? 'genetic-risk' : ''}">
+                            ${condition}
+                        </span>
+                    `).join('')}
+                </div>
+            </div>
+        ` : ''}
+
+        ${member.allergies.length > 0 ? `
+            <div class="family-detail-section">
+                <h4>Allergies</h4>
+                <div class="family-detail-list">
+                    ${member.allergies.map(allergy => `
+                        <span class="family-detail-tag">${allergy}</span>
+                    `).join('')}
+                </div>
+            </div>
+        ` : ''}
+
+        ${geneticConditions.length > 0 ? `
+            <div class="family-detail-section">
+                <div class="genetic-info-panel">
+                    <h5><i class="fas fa-exclamation-triangle"></i> Genetic Risk Information</h5>
+                    <p>This family member has ${geneticConditions.length} condition(s) with genetic components: <strong>${geneticConditions.join(', ')}</strong>. These conditions may increase your risk due to shared genetics. Consider discussing genetic counseling with your healthcare provider.</p>
+                </div>
+            </div>
+        ` : ''}
+    `;
+
+    modal.classList.remove('hidden');
+}
+
+function editFamilyMember(memberId) {
+    const member = appState.familyMembers.find(m => m.id === memberId);
+    if (!member) return;
+
+    appState.editingFamilyMember = member;
+    
+    // Fill form with existing data
+    document.getElementById('familyMemberName').value = member.name;
+    document.getElementById('familyMemberRelationship').value = member.relationship;
+    document.getElementById('familyMemberAge').value = member.age;
+    document.getElementById('familyMemberStatus').value = member.status;
+    document.getElementById('familyMemberConditions').value = member.conditions.join(', ');
+    document.getElementById('familyMemberAllergies').value = member.allergies.join(', ');
+    
+    document.getElementById('familyModalTitle').textContent = 'Edit Family Member';
+    document.getElementById('addFamilyMemberModal').classList.remove('hidden');
+}
+
+function resetFamilyMemberForm() {
+    document.getElementById('addFamilyMemberForm').reset();
+}
+
+function saveFamilyMember() {
+    const name = document.getElementById('familyMemberName').value.trim();
+    const relationship = document.getElementById('familyMemberRelationship').value;
+    const age = parseInt(document.getElementById('familyMemberAge').value);
+    const status = document.getElementById('familyMemberStatus').value;
+    const conditionsText = document.getElementById('familyMemberConditions').value.trim();
+    const allergiesText = document.getElementById('familyMemberAllergies').value.trim();
+
+    if (!name || !relationship || !age || !status) {
+        showToast('Please fill in all required fields', 'error');
+        return;
+    }
+
+    const conditions = conditionsText ? conditionsText.split(',').map(c => c.trim()).filter(c => c) : [];
+    const allergies = allergiesText ? allergiesText.split(',').map(a => a.trim()).filter(a => a) : [];
+
+    const profileImages = {
+        'Father': 'fas fa-user-tie',
+        'Mother': 'fas fa-user',
+        'Brother': 'fas fa-user',
+        'Sister': 'fas fa-user',
+        'Son': 'fas fa-user',
+        'Daughter': 'fas fa-user',
+        'Paternal Grandfather': 'fas fa-user-shield',
+        'Paternal Grandmother': 'fas fa-user',
+        'Maternal Grandfather': 'fas fa-user-shield',
+        'Maternal Grandmother': 'fas fa-user',
+        'Uncle': 'fas fa-user-tie',
+        'Aunt': 'fas fa-user',
+        'Cousin': 'fas fa-user'
+    };
+
+    if (appState.editingFamilyMember) {
+        // Update existing member
+        const member = appState.editingFamilyMember;
+        member.name = name;
+        member.relationship = relationship;
+        member.age = age;
+        member.status = status;
+        member.conditions = conditions;
+        member.allergies = allergies;
+        member.profileImage = profileImages[relationship] || 'fas fa-user';
+        
+        showToast('Family member updated successfully!', 'success');
+    } else {
+        // Add new member
+        const newMember = {
+            id: 'fam' + Date.now(),
+            name,
+            relationship,
+            age,
+            status,
+            conditions,
+            allergies,
+            profileImage: profileImages[relationship] || 'fas fa-user'
+        };
+        
+        appState.familyMembers.push(newMember);
+        showToast('Family member added successfully!', 'success');
+    }
+
+    // Update risk assessments
+    updateRiskAssessments();
+    updateFamilyHistory();
+    
+    document.getElementById('addFamilyMemberModal').classList.add('hidden');
+}
+
+function deleteFamilyMember(memberId) {
+    const member = appState.familyMembers.find(m => m.id === memberId);
+    if (member) {
+        showConfirmModal(
+            'Delete Family Member',
+            `Are you sure you want to delete ${member.name} from your family history? This action cannot be undone.`,
+            () => {
+                appState.familyMembers = appState.familyMembers.filter(m => m.id !== memberId);
+                updateRiskAssessments();
+                updateFamilyHistory();
+                showToast('Family member deleted successfully', 'success');
+            }
+        );
+    }
+}
+
+function updateRiskAssessments() {
+    // Reset risk assessments
+    appState.riskAssessments = [];
+    
+    // Analyze family members for genetic conditions
+    const conditionCounts = {};
+    const membersByCondition = {};
+
+    appState.familyMembers.forEach(member => {
+        member.conditions.forEach(condition => {
+            // Normalize condition names for genetic assessment
+            const normalizedCondition = normalizeConditionForAssessment(condition);
+            if (isGeneticRiskCondition(normalizedCondition)) {
+                if (!conditionCounts[normalizedCondition]) {
+                    conditionCounts[normalizedCondition] = 0;
+                    membersByCondition[normalizedCondition] = [];
+                }
+                conditionCounts[normalizedCondition]++;
+                membersByCondition[normalizedCondition].push(member.name);
+            }
+        });
+    });
+
+    // Create risk assessments based on family history
+    Object.entries(conditionCounts).forEach(([condition, count]) => {
+        const riskLevel = determineRiskLevel(condition, count, membersByCondition[condition]);
+        const assessment = {
+            condition: condition,
+            riskLevel: riskLevel,
+            familyMembers: membersByCondition[condition],
+            inheritancePattern: getInheritancePattern(condition),
+            recommendation: getRecommendation(condition, riskLevel)
+        };
+        appState.riskAssessments.push(assessment);
+    });
+}
+
+// Profile Functions
+function initializeProfile() {
+    updateProfile();
+    initializeProfileForms();
+}
+
+function updateProfile() {
+    const profile = appState.userProfile;
+    
+    // Personal info
+    document.getElementById('profileName').value = profile.name;
+    document.getElementById('profileAge').value = profile.age;
+    document.getElementById('profileHeight').value = profile.height;
+    document.getElementById('profileWeight').value = profile.weight;
+    document.getElementById('profileGender').value = profile.gender;
+    document.getElementById('profileBloodType').value = profile.bloodType;
+    
+    // Emergency contact
+    document.getElementById('emergencyName').value = profile.emergencyContact.name;
+    document.getElementById('emergencyRelation').value = profile.emergencyContact.relation;
+    document.getElementById('emergencyPhone').value = profile.emergencyContact.phone;
+    
+    // Notification preferences
+    document.getElementById('emailReminders').checked = profile.notificationPreferences.emailReminders;
+    document.getElementById('pushNotifications').checked = profile.notificationPreferences.pushNotifications;
+    document.getElementById('soundAlerts').checked = profile.notificationPreferences.soundAlerts;
+    document.getElementById('reminderAdvance').value = profile.notificationPreferences.reminderAdvance;
+    
+    // Tags
+    updateTags('conditionsTags', profile.conditions, 'condition');
+    updateTags('allergiesTags', profile.allergies, 'allergy');
+}
+
+function updateTags(containerId, items, type) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = items.map(item => `
+        <div class="tag">
+            <span>${item}</span>
+            <button class="tag-remove" onclick="removeTag('${type}', '${item}')">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    `).join('');
+}
+
+function initializeProfileForms() {
+    // Personal info form
+    document.getElementById('personalInfoForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        savePersonalInfo();
+    });
+
+    // Emergency contact form
+    document.getElementById('emergencyContactForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        saveEmergencyContact();
+    });
+
+    // Notification preferences form
+    document.getElementById('notificationForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        saveNotificationPreferences();
+    });
+
+    // Add condition button
+    document.getElementById('addConditionBtn').addEventListener('click', () => {
+        const input = document.getElementById('newCondition');
+        const value = input.value.trim();
+        if (value && !appState.userProfile.conditions.includes(value)) {
+            appState.userProfile.conditions.push(value);
+            updateTags('conditionsTags', appState.userProfile.conditions, 'condition');
+            input.value = '';
+            showToast('Medical condition added', 'success');
+        }
+    });
+
+    // Add allergy button
+    document.getElementById('addAllergyBtn').addEventListener('click', () => {
+        const input = document.getElementById('newAllergy');
+        const value = input.value.trim();
+        if (value && !appState.userProfile.allergies.includes(value)) {
+            appState.userProfile.allergies.push(value);
+            updateTags('allergiesTags', appState.userProfile.allergies, 'allergy');
+            input.value = '';
+            showToast('Allergy added', 'success');
+        }
+    });
+
+    // Enter key handlers for tag inputs
+    document.getElementById('newCondition').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            document.getElementById('addConditionBtn').click();
+        }
+    });
+
+    document.getElementById('newAllergy').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            document.getElementById('addAllergyBtn').click();
+        }
+    });
+}
+
+// Modal Functions
+function initializeModals() {
+    initializeConfirmModal();
+}
+
+function initializeConfirmModal() {
+    const modal = document.getElementById('confirmModal');
+    const closeBtn = document.getElementById('closeConfirmModal');
+    const cancelBtn = document.getElementById('cancelConfirm');
+    
+    [closeBtn, cancelBtn].forEach(btn => {
+        btn.addEventListener('click', () => {
+            modal.classList.add('hidden');
+        });
+    });
+    
+    modal.querySelector('.modal-overlay').addEventListener('click', () => {
+        modal.classList.add('hidden');
+    });
+}
+
+// Medication Actions
+function markMedicationTaken(medId) {
+    const med = appState.medications.find(m => m.id === medId);
+    if (med) {
+        med.lastTaken = new Date().toISOString();
+        med.consistencyRate = Math.min(100, med.consistencyRate + 2);
+        
+        updateDashboard();
+        updateMedicationsGrid();
+        updateTodaysMedications();
+        
+        showToast(`${med.name} marked as taken`, 'success');
+    }
+}
+
+function remindMedication(medId) {
+    const med = appState.medications.find(m => m.id === medId);
+    if (med) {
+        showToast(`Reminder set for ${med.name}`, 'info');
+    }
+}
+
+function deleteMedication(medId) {
+    const med = appState.medications.find(m => m.id === medId);
+    if (med) {
+        showConfirmModal(
+            'Delete Medication',
+            `Are you sure you want to delete ${med.name}? This action cannot be undone.`,
+            () => {
+                appState.medications = appState.medications.filter(m => m.id !== medId);
+                appState.dashboardStats.activeMedications = appState.medications.filter(m => m.active).length;
+                
+                updateMedicationsGrid();
+                updateDashboard();
+                updateTodaysMedications();
+                
+                showToast('Medication deleted successfully', 'success');
+            }
+        );
+    }
+}
+
+// Profile Actions
+function savePersonalInfo() {
+    const profile = appState.userProfile;
+    
+    profile.name = document.getElementById('profileName').value;
+    profile.age = parseInt(document.getElementById('profileAge').value);
+    profile.height = document.getElementById('profileHeight').value;
+    profile.weight = document.getElementById('profileWeight').value;
+    profile.gender = document.getElementById('profileGender').value;
+    profile.bloodType = document.getElementById('profileBloodType').value;
+    
+    showToast('Personal information saved', 'success');
+}
+
+function saveEmergencyContact() {
+    const profile = appState.userProfile;
+    
+    profile.emergencyContact.name = document.getElementById('emergencyName').value;
+    profile.emergencyContact.relation = document.getElementById('emergencyRelation').value;
+    profile.emergencyContact.phone = document.getElementById('emergencyPhone').value;
+    
+    showToast('Emergency contact saved', 'success');
+}
+
+function saveNotificationPreferences() {
+    const profile = appState.userProfile;
+    
+    profile.notificationPreferences.emailReminders = document.getElementById('emailReminders').checked;
+    profile.notificationPreferences.pushNotifications = document.getElementById('pushNotifications').checked;
+    profile.notificationPreferences.soundAlerts = document.getElementById('soundAlerts').checked;
+    profile.notificationPreferences.reminderAdvance = parseInt(document.getElementById('reminderAdvance').value);
+    
+    showToast('Notification preferences saved', 'success');
+}
+
+function removeTag(type, item) {
+    if (type === 'condition') {
+        appState.userProfile.conditions = appState.userProfile.conditions.filter(c => c !== item);
+        updateTags('conditionsTags', appState.userProfile.conditions, 'condition');
+    } else if (type === 'allergy') {
+        appState.userProfile.allergies = appState.userProfile.allergies.filter(a => a !== item);
+        updateTags('allergiesTags', appState.userProfile.allergies, 'allergy');
+    }
+    showToast(`${type.charAt(0).toUpperCase() + type.slice(1)} removed`, 'success');
+}
+
+// Family History Utility Functions
+function isGeneticRiskCondition(condition) {
+    const normalizedCondition = normalizeConditionForAssessment(condition);
+    return appState.geneticRiskConditions.some(geneticCondition => 
+        geneticCondition.toLowerCase().includes(normalizedCondition.toLowerCase()) ||
+        normalizedCondition.toLowerCase().includes(geneticCondition.toLowerCase())
+    );
+}
+
+function normalizeConditionForAssessment(condition) {
+    // Handle common variations and synonyms
+    const conditionMap = {
+        'Diabetes': 'Type 2 Diabetes (genetic predisposition)',
+        'Type 2 Diabetes': 'Type 2 Diabetes (genetic predisposition)',
+        'Hypertension': 'Hypertension (familial risk)',
+        'High Blood Pressure': 'Hypertension (familial risk)',
+        'Coronary Artery Disease': 'Coronary Artery Disease (familial risk)',
+        'Heart Disease': 'Coronary Artery Disease (familial risk)',
+        'Asthma': 'Asthma (heritable component)',
+        'Color Blindness': 'Color Blindness (especially red–green)',
+        'Colorblind': 'Color Blindness (especially red–green)',
+        'Migraine': 'Migraine (familial patterns)',
+        'Migraines': 'Migraine (familial patterns)',
+        'Thalassemia Beta': 'Thalassemia (Alpha & Beta)',
+        'Beta Thalassemia': 'Thalassemia (Alpha & Beta)',
+        'Alzheimer\'s Disease': 'Alzheimer\'s Disease (familial/genetic risk forms)',
+        'Alzheimer\'s': 'Alzheimer\'s Disease (familial/genetic risk forms)',
+        'Parkinson\'s Disease': 'Parkinson\'s Disease (familial forms)',
+        'Parkinson\'s': 'Parkinson\'s Disease (familial forms)'
+    };
+    
+    return conditionMap[condition] || condition;
+}
+
+function determineRiskLevel(condition, count, affectedMembers) {
+    // Risk assessment logic based on condition type and family history
+    const highRiskConditions = [
+        'Familial Hypercholesterolemia',
+        'Sickle Cell Disease',
+        'Thalassemia (Alpha & Beta)',
+        'Down Syndrome',
+        'Turner Syndrome',
+        'Klinefelter Syndrome',
+        'Fragile X Syndrome'
+    ];
+
+    const moderateRiskConditions = [
+        'Type 2 Diabetes (genetic predisposition)',
+        'Alzheimer\'s Disease (familial/genetic risk forms)',
+        'Parkinson\'s Disease (familial forms)',
+        'Celiac Disease',
+        'Polycystic Kidney Disease (PKD)',
+        'Polycystic Ovary Syndrome (PCOS)'
+    ];
+
+    if (highRiskConditions.includes(condition) || count >= 3) {
+        return 'high';
+    } else if (moderateRiskConditions.includes(condition) || count >= 2) {
+        return 'moderate';
+    } else {
+        return 'low';
+    }
+}
+
+function getInheritancePattern(condition) {
+    const inheritancePatterns = {
+        'Type 2 Diabetes (genetic predisposition)': 'Multifactorial inheritance with strong genetic component',
+        'Thalassemia (Alpha & Beta)': 'Autosomal recessive inheritance',
+        'Alzheimer\'s Disease (familial/genetic risk forms)': 'Complex inheritance with genetic risk factors',
+        'Familial Hypercholesterolemia': 'Autosomal dominant inheritance',
+        'Hypertension (familial risk)': 'Multifactorial inheritance with genetic predisposition',
+        'Coronary Artery Disease (familial risk)': 'Multifactorial inheritance with genetic component',
+        'Asthma (heritable component)': 'Complex inheritance with environmental factors',
+        'Color Blindness (especially red–green)': 'X-linked recessive inheritance',
+        'Celiac Disease': 'Multifactorial inheritance with HLA association',
+        'Migraine (familial patterns)': 'Complex inheritance with genetic predisposition',
+        'Parkinson\'s Disease (familial forms)': 'Autosomal dominant/recessive variations'
+    };
+    
+    return inheritancePatterns[condition] || 'Genetic predisposition with variable inheritance patterns';
+}
+
+function getRecommendation(condition, riskLevel) {
+    const recommendations = {
+        'high': {
+            'Type 2 Diabetes (genetic predisposition)': 'Immediate genetic counseling recommended, regular glucose screening, aggressive lifestyle modifications',
+            'Thalassemia (Alpha & Beta)': 'Genetic testing strongly recommended before family planning, carrier screening advised',
+            'Familial Hypercholesterolemia': 'Immediate lipid screening, cardiac assessment, genetic testing recommended',
+            'default': 'Genetic counseling strongly recommended, regular screening, lifestyle modifications'
+        },
+        'moderate': {
+            'Type 2 Diabetes (genetic predisposition)': 'Regular glucose screening, lifestyle modifications, genetic counseling recommended',
+            'Alzheimer\'s Disease (familial/genetic risk forms)': 'Cognitive health monitoring, lifestyle modifications, genetic counseling available',
+            'Parkinson\'s Disease (familial forms)': 'Neurological monitoring, lifestyle modifications, genetic counseling consideration',
+            'default': 'Regular screening recommended, lifestyle modifications, genetic counseling available'
+        },
+        'low': {
+            'default': 'General health monitoring, maintain healthy lifestyle, discuss with healthcare provider'
+        }
+    };
+    
+    const riskRecommendations = recommendations[riskLevel];
+    return riskRecommendations[condition] || riskRecommendations['default'];
+}
+
+function getRiskIcon(riskLevel) {
+    const icons = {
+        'high': 'fa-exclamation-triangle',
+        'moderate': 'fa-exclamation-circle',
+        'low': 'fa-info-circle'
+    };
+    return icons[riskLevel] || 'fa-info-circle';
 }
 
 // Utility Functions
-function formatTime(time24) {
-    if (!time24) return '';
-    const [hours, minutes] = time24.split(':');
-    const hour12 = hours % 12 || 12;
-    const ampm = hours >= 12 ? 'PM' : 'AM';
-    return `${hour12}:${minutes} ${ampm}`;
+function formatTime(time) {
+    const [hours, minutes] = time.split(':');
+    const hour = parseInt(hours);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const displayHour = hour % 12 || 12;
+    return `${displayHour}:${minutes} ${ampm}`;
 }
 
-function formatDate(dateString) {
-    if (!dateString) return '';
-    const date = new Date(dateString);
+function formatDate(dateStr) {
+    const date = new Date(dateStr);
     return date.toLocaleDateString('en-US', { 
         year: 'numeric', 
         month: 'long', 
@@ -1163,44 +1356,147 @@ function formatDate(dateString) {
     });
 }
 
-function formatDateTime(dateTime) {
-    if (!dateTime) return '';
-    const date = new Date(dateTime);
+function isTimePassedToday(time) {
     const now = new Date();
-    
-    // If today, show time only
-    if (date.toDateString() === now.toDateString()) {
-        return formatTime(date.toTimeString().slice(0, 5));
-    }
-    
-    // If tomorrow, show "Tomorrow at time"
-    const tomorrow = new Date(now);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    if (date.toDateString() === tomorrow.toDateString()) {
-        return `Tomorrow at ${formatTime(date.toTimeString().slice(0, 5))}`;
-    }
-    
-    // Otherwise show full date and time
-    return `${formatDate(date.toISOString().split('T')[0])} at ${formatTime(date.toTimeString().slice(0, 5))}`;
+    const today = now.toISOString().split('T')[0];
+    const timeToday = new Date(`${today}T${time}:00`);
+    return now > timeToday;
 }
 
-function formatFrequency(frequency) {
+function getFrequencyText(frequency) {
     const frequencies = {
-        'once_daily': 'Once daily',
-        'twice_daily': 'Twice daily', 
-        'three_times_daily': 'Three times daily',
-        'as_needed': 'As needed'
+        'once_daily': 'Once Daily',
+        'twice_daily': 'Twice Daily',
+        'three_times_daily': 'Three Times Daily',
+        'four_times_daily': 'Four Times Daily',
+        'as_needed': 'As Needed'
     };
     return frequencies[frequency] || frequency;
 }
 
-// Make functions globally available for onclick handlers
-window.takeMedication = takeMedication;
-window.remindMedication = remindMedication;
-window.deleteMedication = deleteMedication;
-window.removeTag = removeTag;
-window.removeTimeInput = removeTimeInput;
-window.showMedicationModal = showMedicationModal;
-window.hideMedicationModal = hideMedicationModal;
+function calculateNextDue(time) {
+    const today = new Date().toISOString().split('T')[0];
+    const nextDue = new Date(`${today}T${time}:00`);
+    
+    if (nextDue < new Date()) {
+        nextDue.setDate(nextDue.getDate() + 1);
+    }
+    
+    return nextDue.toISOString();
+}
 
+// Toast Notification Functions
+function showToast(message, type = 'info', title = null) {
+    const toast = document.createElement('div');
+    toast.className = `toast toast--${type}`;
+    
+    const icons = {
+        success: 'fa-check-circle',
+        error: 'fa-exclamation-circle',
+        warning: 'fa-exclamation-triangle',
+        info: 'fa-info-circle'
+    };
+    
+    const titles = {
+        success: 'Success',
+        error: 'Error',
+        warning: 'Warning',
+        info: 'Info'
+    };
+    
+    toast.innerHTML = `
+        <i class="fas ${icons[type]} toast-icon"></i>
+        <div class="toast-content">
+            <div class="toast-title">${title || titles[type]}</div>
+            <p class="toast-message">${message}</p>
+        </div>
+        <button class="toast-close">
+            <i class="fas fa-times"></i>
+        </button>
+    `;
+    
+    const closeBtn = toast.querySelector('.toast-close');
+    closeBtn.addEventListener('click', () => {
+        hideToast(toast);
+    });
+    
+    toastContainer.appendChild(toast);
+    
+    // Show toast with animation
+    setTimeout(() => {
+        toast.classList.add('show');
+    }, 100);
+    
+    // Auto hide after 4 seconds
+    setTimeout(() => {
+        hideToast(toast);
+    }, 4000);
+}
 
+function hideToast(toast) {
+    toast.classList.remove('show');
+    setTimeout(() => {
+        if (toast.parentNode) {
+            toast.parentNode.removeChild(toast);
+        }
+    }, 300);
+}
+
+// Confirmation Modal
+function showConfirmModal(title, message, onConfirm) {
+    const modal = document.getElementById('confirmModal');
+    const titleEl = document.getElementById('confirmTitle');
+    const messageEl = document.getElementById('confirmMessage');
+    const confirmBtn = document.getElementById('confirmAction');
+    
+    titleEl.textContent = title;
+    messageEl.textContent = message;
+    
+    // Remove existing listeners and add new one
+    const newConfirmBtn = confirmBtn.cloneNode(true);
+    confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+    
+    newConfirmBtn.addEventListener('click', () => {
+        onConfirm();
+        modal.classList.add('hidden');
+    });
+    
+    modal.classList.remove('hidden');
+}
+
+// Handle responsive behavior
+window.addEventListener('resize', () => {
+    if (window.innerWidth > 768) {
+        sidebar.classList.remove('active');
+    }
+});
+
+// Keyboard navigation
+document.addEventListener('keydown', (e) => {
+    // Close modals with Escape key
+    if (e.key === 'Escape') {
+        const openModals = document.querySelectorAll('.modal:not(.hidden)');
+        openModals.forEach(modal => modal.classList.add('hidden'));
+        
+        if (window.innerWidth <= 768 && sidebar.classList.contains('active')) {
+            sidebar.classList.remove('active');
+        }
+    }
+});
+
+// Handle form submissions
+document.addEventListener('submit', (e) => {
+    const form = e.target;
+    if (form.id === 'addMedicationForm') {
+        e.preventDefault();
+        saveMedication();
+    } else if (form.id === 'addFamilyMemberForm') {
+        e.preventDefault();
+        saveFamilyMember();
+    }
+});
+
+// Initialize risk assessments on page load
+document.addEventListener('DOMContentLoaded', function() {
+    updateRiskAssessments();
+});
