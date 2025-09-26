@@ -3,487 +3,395 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MedSync</title>
+    <title>MedSync - Your Medical Dashboard</title>
     <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <div class="app-container">
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Main Layout -->
+    <div class="app-layout">
         <!-- Sidebar Navigation -->
         <nav class="sidebar">
             <div class="sidebar-header">
-                <div class="logo">
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
-                    </svg>
-                    <h2>MedSync</h2>
-                </div>
+                <h2><i class="fas fa-heartbeat"></i> MedSync</h2>
             </div>
-            
-            <ul class="nav-menu">
-                <li><a href="#" class="nav-link active" data-section="dashboard">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="3" y="3" width="7" height="7"/>
-                        <rect x="14" y="3" width="7" height="7"/>
-                        <rect x="14" y="14" width="7" height="7"/>
-                        <rect x="3" y="14" width="7" height="7"/>
-                    </svg>
-                    Dashboard
-                </a></li>
-                <li><a href="#" class="nav-link" data-section="lab-results">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M9 11H7a2 2 0 00-2 2v7a2 2 0 002 2h10a2 2 0 002-2v-7a2 2 0 00-2-2h-2M9 11V9a2 2 0 112 4h2m-6-4V7a2 2 0 012-2h2a2 2 0 012 2v2m-6 4h6"/>
-                    </svg>
-                    Lab Results
-                </a></li>
-                <li><a href="#" class="nav-link" data-section="medications">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="4" y="4" width="16" height="16" rx="2"/>
-                        <rect x="9" y="9" width="6" height="6"/>
-                        <line x1="9" y1="1" x2="9" y2="4"/>
-                        <line x1="15" y1="1" x2="15" y2="4"/>
-                        <line x1="9" y1="20" x2="9" y2="23"/>
-                        <line x1="15" y1="20" x2="15" y2="23"/>
-                    </svg>
-                    Medications
-                </a></li>
-                <li><a href="#" class="nav-link" data-section="family-history">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/>
-                        <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
-                    </svg>
-                    Family History
-                </a></li>
-                <li><a href="#" class="nav-link" data-section="appointments">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                        <line x1="16" y1="2" x2="16" y2="6"/>
-                        <line x1="8" y1="2" x2="8" y2="6"/>
-                        <line x1="3" y1="10" x2="21" y2="10"/>
-                    </svg>
-                    Appointments
-                </a></li>
-                <li><a href="#" class="nav-link" data-section="qr-codes">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="3" y="3" width="5" height="5"/>
-                        <rect x="16" y="3" width="5" height="5"/>
-                        <rect x="3" y="16" width="5" height="5"/>
-                        <path d="m21 16-3.5-3.5-2.5 2.5"/>
-                        <path d="m13 13 3 3 4.5-4.5"/>
-                        <path d="M9 9h1v1h-1z"/>
-                    </svg>
-                    QR Codes
-                </a></li>
-                <li><a href="#" class="nav-link" data-section="profile">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
-                        <circle cx="12" cy="7" r="4"/>
-                    </svg>
-                    Profile
-                </a></li>
+            <ul class="sidebar-menu">
+                <li>
+                    <a href="#" class="nav-link active" data-page="dashboard">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="nav-link" data-page="lab-results">
+                        <i class="fas fa-flask"></i>
+                        <span>Lab Results</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="nav-link" data-page="medications">
+                        <i class="fas fa-pills"></i>
+                        <span>Medications</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="nav-link" data-page="profile">
+                        <i class="fas fa-user"></i>
+                        <span>Profile</span>
+                    </a>
+                </li>
             </ul>
         </nav>
 
-        <!-- Main Content -->
+        <!-- Main Content Area -->
         <main class="main-content">
-            <!-- Dashboard Section -->
-            <section id="dashboard" class="content-section active">
-                <div class="section-header">
-                    <h1>Health Dashboard</h1>
-                    <p class="section-subtitle">Overview of your current health status</p>
+            <!-- Header -->
+            <header class="header">
+                <h1 id="page-title">Dashboard</h1>
+                <div class="user-greeting">
+                    <span>Welcome back, <strong id="user-name">Sarah</strong></span>
+                </div>
+            </header>
+
+            <!-- Dashboard Page -->
+            <div id="dashboard-page" class="page active">
+                <!-- Overview Cards (3 cards only) -->
+                <div class="overview-cards">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-calendar-alt"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>Last Test Date</h3>
+                            <p id="last-test-date">Loading...</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-pills"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>Active Medications</h3>
+                            <p id="active-meds">Loading...</p>
+                        </div>
+                    </div>
+                    <div class="stat-card success-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>Consistency Rate</h3>
+                            <p id="consistency-rate">Loading...</p>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="dashboard-grid">
-                    <!-- Health Alerts -->
-                    <div class="card alert-card">
-                        <div class="card__body">
-                            <h3>⚠️ Health Alerts</h3>
-                            <div class="alert-item">
-                                <span class="status status--error">Low Hemoglobin</span>
-                                <p>Your recent blood test shows low hemoglobin levels indicating mild anemia.</p>
-                                <a href="#" class="btn btn--sm btn--outline" onclick="showSection('lab-results')">View Details</a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Recent Lab Results -->
+                <!-- Large AI Health Summary Box -->
+                <div class="ai-health-summary-box">
                     <div class="card">
                         <div class="card__body">
-                            <h3>📊 Latest Lab Results</h3>
-                            <p class="text-secondary">Complete Blood Count - Sep 20, 2025</p>
-                            <div class="lab-summary">
-                                <div class="lab-item">
-                                    <span class="lab-name">Hemoglobin</span>
-                                    <span class="lab-value low">10.2 g/dL</span>
+                            <div class="ai-summary-header">
+                                <div class="stat-icon">
+                                    <i class="fas fa-brain"></i>
                                 </div>
-                                <div class="lab-item">
-                                    <span class="lab-name">WBC</span>
-                                    <span class="lab-value normal">7.2 ×10³/μL</span>
-                                </div>
-                                <div class="lab-item">
-                                    <span class="lab-name">Platelets</span>
-                                    <span class="lab-value normal">285 ×10³/μL</span>
-                                </div>
+                                <h3>AI Health Summary</h3>
                             </div>
-                        </div>
-                    </div>
-
-                    <!-- Upcoming Appointments -->
-                    <div class="card">
-                        <div class="card__body">
-                            <h3>📅 Next Appointment</h3>
-                            <div class="appointment-preview">
-                                <div class="appointment-date">
-                                    <strong>Oct 5, 2025</strong>
-                                    <span>10:00 AM</span>
-                                </div>
-                                <div class="appointment-details">
-                                    <p><strong>Dr. Emily Chen</strong></p>
-                                    <p>Follow-up for anemia</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Medication Reminders -->
-                    <div class="card">
-                        <div class="card__body">
-                            <h3>💊 Today's Medications</h3>
-                            <div class="med-reminders">
-                                <div class="med-reminder">
-                                    <span class="med-name">Iron Supplement</span>
-                                    <span class="med-time">8:00 AM</span>
-                                    <button class="btn btn--sm btn--primary" onclick="takeMedication('iron')">Take</button>
-                                </div>
-                                <div class="med-reminder">
-                                    <span class="med-name">Vitamin D3</span>
-                                    <span class="med-time">8:00 AM</span>
-                                    <button class="btn btn--sm btn--primary" onclick="takeMedication('vitd')">Take</button>
-                                </div>
+                            <div class="ai-summary-text">
+                                <p id="ai-health-summary">Loading...</p>
                             </div>
                         </div>
                     </div>
                 </div>
-            </section>
 
-            <!-- Lab Results Section -->
-            <section id="lab-results" class="content-section">
-                <div class="section-header">
-                    <h1>Lab Results Analysis</h1>
-                    <p class="section-subtitle">AI-powered interpretation of your blood test results</p>
-                </div>
-
-                <!-- Overall Assessment -->
-                <div class="card assessment-card">
-                    <div class="card__body">
-                        <h3>🤖 AI Health Assessment</h3>
-                        <p id="overall-assessment">Your blood test shows mild iron deficiency anemia. While not immediately dangerous, this condition can make you feel tired and weak. The good news is that it's very treatable with proper nutrition and supplements.</p>
+                <!-- Today's Medications -->
+                <div class="today-medications">
+                    <h3>Today's Medications</h3>
+                    <div class="medication-list" id="today-meds-list">
+                        <!-- Medications will be populated by JavaScript -->
                     </div>
                 </div>
+            </div>
 
-                <!-- Lab Results Table -->
-                <div class="card">
-                    <div class="card__body">
-                        <h3>Blood Test Results - September 20, 2025</h3>
-                        <div class="lab-results-table">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Parameter</th>
-                                        <th>Your Value</th>
-                                        <th>Normal Range</th>
-                                        <th>Status</th>
-                                        <th>Details</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="lab-results-tbody">
-                                    <!-- Lab results will be populated by JavaScript -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Medications Section -->
-            <section id="medications" class="content-section">
-                <div class="section-header">
-                    <h1>Medication Manager</h1>
-                    <p class="section-subtitle">Track your prescriptions and set reminders</p>
-                </div>
-
-                <div class="medications-grid">
-                    <div class="card">
+            <!-- Lab Results Page -->
+            <div id="lab-results-page" class="page">
+                <!-- Upload Section -->
+                <div class="upload-section">
+                    <div class="card upload-card">
                         <div class="card__body">
-                            <h3>Current Medications</h3>
-                            <div id="medications-list">
-                                <!-- Medications will be populated by JavaScript -->
+                            <h3>Upload New Lab Report</h3>
+                            <div class="upload-zone" id="lab-upload-zone">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <p>Drag & drop your PDF lab report here or <button class="upload-btn" id="lab-upload-btn">browse files</button></p>
+                                <input type="file" id="lab-file-input" accept=".pdf" style="display: none;">
+                            </div>
+                            <div class="upload-progress hidden" id="lab-upload-progress">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" id="lab-progress-fill"></div>
+                                </div>
+                                <p>Processing your lab report...</p>
                             </div>
                         </div>
                     </div>
+                </div>
 
+                <!-- AI Summary Section -->
+                <div class="ai-summary-section">
                     <div class="card">
                         <div class="card__body">
-                            <h3>Refill Reminders</h3>
-                            <div class="refill-alerts">
-                                <div class="refill-alert">
-                                    <span class="status status--warning">Due Soon</span>
-                                    <p><strong>Iron Supplement</strong> - Refill by Oct 15, 2025</p>
+                            <h3><i class="fas fa-robot"></i> AI Analysis of Latest Report</h3>
+                            <div class="ai-summary-content">
+                                <div class="test-metadata">
+                                    <p class="test-date">Test Date: <span id="current-test-date">September 20, 2025</span></p>
+                                    <p class="test-type">Test Type: <span id="current-test-type">Complete Blood Count (CBC)</span></p>
+                                </div>
+                                <div class="ai-analysis-text">
+                                    <p id="current-analysis-summary">Your recent CBC results indicate mild anemia with low hemoglobin and hematocrit levels, while platelets are slightly elevated suggesting possible inflammation. Your iron supplement regimen appears to be helping, and consistency with medications has improved. Continue current treatment plan and consider adding vitamin C to enhance iron absorption.</p>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </section>
 
-            <!-- Family History Section -->
-            <section id="family-history" class="content-section">
-                <div class="section-header">
-                    <h1>Family Medical History</h1>
-                    <p class="section-subtitle">Track genetic patterns and hereditary risks</p>
-                </div>
-
-                <div class="family-grid">
+                <!-- History of AI Summaries -->
+                <div class="ai-history-section">
                     <div class="card">
                         <div class="card__body">
-                            <h3>🧬 Genetic Risk Assessment</h3>
-                            <div id="genetic-risks">
-                                <!-- Genetic risks will be populated by JavaScript -->
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <div class="card__body">
-                            <h3>👨‍👩‍👧‍👦 Family Tree</h3>
-                            <div class="family-tree">
-                                <div class="generation">
-                                    <h4>Grandparents</h4>
-                                    <div class="family-row">
-                                        <div class="family-member" onclick="showFamilyDetails('paternal-grandfather')">
-                                            <strong>James Johnson</strong>
-                                            <small>Paternal Grandfather (deceased)</small>
-                                            <div class="conditions">Heart Attack, Stroke</div>
-                                        </div>
-                                        <div class="family-member" onclick="showFamilyDetails('paternal-grandmother')">
-                                            <strong>Mary Johnson</strong>
-                                            <small>Paternal Grandmother</small>
-                                            <div class="conditions">Heart Disease, Arthritis</div>
-                                        </div>
-                                        <div class="family-member" onclick="showFamilyDetails('maternal-grandfather')">
-                                            <strong>William Smith</strong>
-                                            <small>Maternal Grandfather (deceased)</small>
-                                            <div class="conditions">Lung Cancer</div>
-                                        </div>
-                                        <div class="family-member" onclick="showFamilyDetails('maternal-grandmother')">
-                                            <strong>Patricia Smith</strong>
-                                            <small>Maternal Grandmother</small>
-                                            <div class="conditions">Breast Cancer, Anemia</div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="generation">
-                                    <h4>Parents</h4>
-                                    <div class="family-row">
-                                        <div class="family-member" onclick="showFamilyDetails('father')">
-                                            <strong>Robert Johnson</strong>
-                                            <small>Father</small>
-                                            <div class="conditions">Type 2 Diabetes, Hypertension</div>
-                                        </div>
-                                        <div class="family-member" onclick="showFamilyDetails('mother')">
-                                            <strong>Linda Smith</strong>
-                                            <small>Mother</small>
-                                            <div class="conditions">Iron Deficiency Anemia, Osteoporosis</div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="generation">
-                                    <h4>Your Generation</h4>
-                                    <div class="family-row">
-                                        <div class="family-member patient">
-                                            <strong>Sarah Johnson (You)</strong>
-                                            <div class="conditions">Mild Anemia, Seasonal Allergies</div>
-                                        </div>
-                                        <div class="family-member" onclick="showFamilyDetails('brother')">
-                                            <strong>David Johnson</strong>
-                                            <small>Brother</small>
-                                            <div class="conditions">Asthma</div>
-                                        </div>
-                                    </div>
-                                </div>
+                            <h3><i class="fas fa-history"></i> History of AI Summaries</h3>
+                            <div class="ai-history-list" id="ai-history-list">
+                                <!-- History will be populated by JavaScript -->
                             </div>
                         </div>
                     </div>
                 </div>
-            </section>
+            </div>
 
-            <!-- Appointments Section -->
-            <section id="appointments" class="content-section">
-                <div class="section-header">
-                    <h1>Medical Appointments</h1>
-                    <p class="section-subtitle">Track your appointment history and upcoming visits</p>
+            <!-- Medications Page -->
+            <div id="medications-page" class="page">
+                <div class="medications-header">
+                    <button class="btn btn--primary" id="add-medication-btn">
+                        <i class="fas fa-plus"></i> Add Medication
+                    </button>
                 </div>
 
-                <div class="appointments-grid">
-                    <div class="card">
-                        <div class="card__body">
-                            <h3>Upcoming Appointments</h3>
-                            <div id="upcoming-appointments">
-                                <!-- Will be populated by JavaScript -->
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <div class="card__body">
-                            <h3>Appointment History</h3>
-                            <div id="appointment-history">
-                                <!-- Will be populated by JavaScript -->
-                            </div>
-                        </div>
-                    </div>
+                <div class="medications-grid" id="medications-grid">
+                    <!-- Medication cards will be populated by JavaScript -->
                 </div>
-            </section>
+            </div>
 
-            <!-- QR Codes Section -->
-            <section id="qr-codes" class="content-section">
-                <div class="section-header">
-                    <h1>QR Code Generator</h1>
-                    <p class="section-subtitle">Share your medical information securely</p>
-                </div>
-
-                <div class="qr-grid">
-                    <div class="card">
-                        <div class="card__body">
-                            <h3>Latest Lab Results</h3>
-                            <div class="qr-container" id="qr-lab-results"></div>
-                            <button class="btn btn--primary btn--full-width" onclick="generateQRCode('lab-results')">Generate QR Code</button>
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <div class="card__body">
-                            <h3>Emergency Medical Info</h3>
-                            <div class="qr-container" id="qr-emergency"></div>
-                            <button class="btn btn--primary btn--full-width" onclick="generateQRCode('emergency')">Generate QR Code</button>
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <div class="card__body">
-                            <h3>Current Medications</h3>
-                            <div class="qr-container" id="qr-medications"></div>
-                            <button class="btn btn--primary btn--full-width" onclick="generateQRCode('medications')">Generate QR Code</button>
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <div class="card__body">
-                            <h3>Complete Medical History</h3>
-                            <div class="qr-container" id="qr-complete"></div>
-                            <button class="btn btn--primary btn--full-width" onclick="generateQRCode('complete')">Generate QR Code</button>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Profile Section -->
-            <section id="profile" class="content-section">
-                <div class="section-header">
-                    <h1>Patient Profile</h1>
-                    <p class="section-subtitle">Manage your personal health information</p>
-                </div>
-
-                <div class="profile-grid">
-                    <div class="card">
-                        <div class="card__body">
+            <!-- Profile Page -->
+            <div id="profile-page" class="page">
+                <div class="profile-form-container">
+                    <form id="profile-form" class="profile-form">
+                        <!-- Basic Information -->
+                        <div class="form-section">
                             <h3>Basic Information</h3>
-                            <form id="profile-form">
+                            <div class="form-row">
                                 <div class="form-group">
                                     <label class="form-label">Full Name</label>
-                                    <input type="text" class="form-control" id="patient-name" value="Sarah Johnson">
+                                    <input type="text" class="form-control" id="profile-name" required>
                                 </div>
                                 <div class="form-group">
                                     <label class="form-label">Age</label>
-                                    <input type="number" class="form-control" id="patient-age" value="32">
+                                    <input type="number" class="form-control" id="profile-age" min="1" max="120">
                                 </div>
+                            </div>
+                            <div class="form-row">
                                 <div class="form-group">
                                     <label class="form-label">Height</label>
-                                    <input type="text" class="form-control" id="patient-height" value="5'6&quot;">
+                                    <input type="text" class="form-control" id="profile-height" placeholder="5'6&quot;">
                                 </div>
                                 <div class="form-group">
                                     <label class="form-label">Weight</label>
-                                    <input type="text" class="form-control" id="patient-weight" value="145 lbs">
+                                    <input type="text" class="form-control" id="profile-weight" placeholder="145 lbs">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">Gender</label>
+                                    <select class="form-control" id="profile-gender">
+                                        <option value="">Select gender</option>
+                                        <option value="Male">Male</option>
+                                        <option value="Female">Female</option>
+                                        <option value="Other">Other</option>
+                                        <option value="Prefer not to say">Prefer not to say</option>
+                                    </select>
                                 </div>
                                 <div class="form-group">
                                     <label class="form-label">Blood Type</label>
-                                    <select class="form-control" id="patient-blood-type">
-                                        <option value="O+">O+</option>
-                                        <option value="O-">O-</option>
+                                    <select class="form-control" id="profile-blood-type">
+                                        <option value="">Select blood type</option>
                                         <option value="A+">A+</option>
                                         <option value="A-">A-</option>
                                         <option value="B+">B+</option>
                                         <option value="B-">B-</option>
                                         <option value="AB+">AB+</option>
                                         <option value="AB-">AB-</option>
+                                        <option value="O+">O+</option>
+                                        <option value="O-">O-</option>
                                     </select>
                                 </div>
-                                <button type="button" class="btn btn--primary" onclick="saveProfile()">Save Changes</button>
-                            </form>
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <div class="card__body">
-                            <h3>Medical Conditions</h3>
-                            <div class="condition-list">
-                                <div class="condition-item">
-                                    <span class="status status--warning">Mild Anemia</span>
-                                </div>
-                                <div class="condition-item">
-                                    <span class="status status--info">Seasonal Allergies</span>
-                                </div>
-                            </div>
-
-                            <h4>Known Allergies</h4>
-                            <div class="allergy-list">
-                                <div class="allergy-item">
-                                    <span class="status status--error">Penicillin</span>
-                                </div>
-                                <div class="allergy-item">
-                                    <span class="status status--error">Shellfish</span>
-                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="card">
-                        <div class="card__body">
+                        <!-- Medical Information -->
+                        <div class="form-section">
+                            <h3>Medical Information</h3>
+                            <div class="form-group">
+                                <label class="form-label">Medical Conditions</label>
+                                <div class="tags-container" id="conditions-container">
+                                    <!-- Tags will be populated by JavaScript -->
+                                </div>
+                                <input type="text" class="form-control" id="conditions-input" placeholder="Type condition and press Enter">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Allergies</label>
+                                <div class="tags-container" id="allergies-container">
+                                    <!-- Tags will be populated by JavaScript -->
+                                </div>
+                                <input type="text" class="form-control" id="allergies-input" placeholder="Type allergy and press Enter">
+                            </div>
+                        </div>
+
+                        <!-- Emergency Contact -->
+                        <div class="form-section">
                             <h3>Emergency Contact</h3>
-                            <div class="emergency-contact">
-                                <p><strong>Michael Johnson</strong></p>
-                                <p>Spouse</p>
-                                <p>(555) 123-4567</p>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">Contact Name</label>
+                                    <input type="text" class="form-control" id="emergency-name">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Relationship</label>
+                                    <input type="text" class="form-control" id="emergency-relation">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Phone Number</label>
+                                <input type="tel" class="form-control" id="emergency-phone">
                             </div>
                         </div>
-                    </div>
+
+                        <!-- Notification Preferences -->
+                        <div class="form-section">
+                            <h3>Notification Preferences</h3>
+                            <div class="checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="email-reminders">
+                                    <span class="checkmark"></span>
+                                    Email Reminders
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="push-notifications">
+                                    <span class="checkmark"></span>
+                                    Push Notifications
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="sound-alerts">
+                                    <span class="checkmark"></span>
+                                    Sound Alerts
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn--primary btn--lg">
+                                <span class="btn-text">Save Profile</span>
+                                <i class="fas fa-spinner fa-spin btn-loader hidden"></i>
+                            </button>
+                        </div>
+                    </form>
                 </div>
-            </section>
+            </div>
         </main>
     </div>
 
-    <!-- Detail Modal -->
-    <div id="detail-modal" class="modal hidden">
-        <div class="modal-backdrop" onclick="closeModal()"></div>
+    <!-- Add Medication Modal -->
+    <div class="modal hidden" id="add-medication-modal">
+        <div class="modal-overlay"></div>
         <div class="modal-content">
             <div class="modal-header">
-                <h3 id="modal-title">Details</h3>
-                <button class="modal-close" onclick="closeModal()">×</button>
+                <h3>Add New Medication</h3>
+                <button class="modal-close" id="modal-close-btn">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
-            <div class="modal-body" id="modal-body">
-                <!-- Content will be populated by JavaScript -->
+            <div class="modal-body">
+                <form id="medication-form">
+                    <div class="form-group">
+                        <label class="form-label">Medication Name</label>
+                        <input type="text" class="form-control" id="med-name" required>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Dosage</label>
+                            <input type="number" class="form-control" id="med-dosage" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Unit</label>
+                            <select class="form-control" id="med-unit" required>
+                                <option value="">Select unit</option>
+                                <option value="mg">mg</option>
+                                <option value="ml">ml</option>
+                                <option value="tablets">tablets</option>
+                                <option value="IU">IU</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Frequency</label>
+                        <select class="form-control" id="med-frequency" required>
+                            <option value="">Select frequency</option>
+                            <option value="once_daily">Once daily</option>
+                            <option value="twice_daily">Twice daily</option>
+                            <option value="three_times_daily">Three times daily</option>
+                            <option value="as_needed">As needed</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="times-group">
+                        <label class="form-label">Times</label>
+                        <div id="time-inputs">
+                            <!-- Time inputs will be populated by JavaScript -->
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Instructions</label>
+                        <textarea class="form-control" id="med-instructions" rows="3" placeholder="Special instructions..."></textarea>
+                    </div>
+                    <div class="checkbox-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="med-with-food">
+                            <span class="checkmark"></span>
+                            Take with food
+                        </label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn--outline" id="modal-cancel-btn">Cancel</button>
+                <button type="submit" class="btn btn--primary" form="medication-form">Add Medication</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div class="modal hidden" id="confirmation-modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="confirmation-title">Confirm Action</h3>
+                <button class="modal-close" id="confirmation-close-btn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p id="confirmation-message">Are you sure you want to proceed?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn--outline" id="confirmation-cancel-btn">Cancel</button>
+                <button type="button" class="btn btn--primary" id="confirmation-confirm-btn">Confirm</button>
             </div>
         </div>
     </div>
