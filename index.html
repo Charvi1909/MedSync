@@ -6,7 +6,6 @@
     <title>MedSync - Your Medical Dashboard</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<style> /* App shell: sidebar + main content */ .app-layout { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; } /* Ensure sidebar occupies the left column */ .sidebar { width: 260px; } /* Main content area */ .main-content { padding: 16px 20px; overflow: auto; } /* Make QR preview stand out on dark themes */ #qr-container { background: #ffffff; } </style>[2][1]
 </head>
 <body>
     <!-- Toast Notification Container -->
@@ -44,7 +43,6 @@
                         <span>Profile</span>
                     </a>
                 </li>
-                <li> <a href="#" class="nav-link" data-section="emergency-qr"> <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"> <path d="M12 2l3 6 6 1-4.5 4.4L18 20l-6-3-6 3 1.5-6.6L3 9l6-1 3-6z"/> </svg> <span>Emergency QR</span> </a> </li>[1][2][3]
             </ul>
         </nav>
 
@@ -397,79 +395,7 @@
             </div>
         </div>
     </div>
-    <section id="emergency-qr" class="section">
-  <header class="section-header">
-    <h1>Emergency QR</h1>
-    <button class="btn btn-primary" id="btn-generate-qr">Generate QR</button>
-  </header>
 
-  <div class="card">
-    <h2>Included Details</h2>
-    <p class="text-sm">This QR encodes essential info for first responders and doctors. Keep it up to date.</p>
-
-    <div class="grid" style="grid-template-columns: repeat(auto-fit,minmax(240px,1fr)); gap: 1rem;">
-      <div class="p-md" style="background: var(--bg-tertiary); border-radius: 8px;">
-        <h3>Patient</h3>
-        <ul class="text-sm">
-          <li>Name, Age, Gender, Blood Type</li>
-          <li>Conditions, Allergies</li>
-          <li>Medications (name, dose, schedule)</li>
-          <li>Emergency Contact</li>
-        </ul>
-      </div>
-      <div class="p-md" style="background: var(--bg-tertiary); border-radius: 8px;">
-        <h3>Latest Labs</h3>
-        <ul class="text-sm">
-          <li>Test Type, Date</li>
-          <li>Key parameters (value, status)</li>
-        </ul>
-      </div>
-      <div class="p-md" style="background: var(--bg-tertiary); border-radius: 8px;">
-        <h3>Safety</h3>
-        <ul class="text-sm">
-          <li>Only essentials, compact JSON</li>
-          <li>Optional password hint field</li>
-          <li>QR version auto‑optimized</li>
-        </ul>
-      </div>
-    </div>
-  </div>
-
-  <div class="card">
-    <h2>QR Preview</h2>
-    <div class="flex gap-md items-center">
-      <div id="qr-container" style="padding: 12px; background:#fff; border:1px solid var(--border-color); border-radius:8px;">
-        <div id="qr-canvas"></div>
-      </div>
-
-      <div>
-        <button class="btn btn-secondary" id="btn-download-qr">Download PNG</button>
-        <button class="btn btn-secondary" id="btn-print-qr">Print</button>
-      </div>
-    </div>
-
-    <div class="p-md" style="margin-top:1rem; background: var(--bg-tertiary); border-radius: 8px;">
-      <label class="text-sm">Optional: Add brief note (e.g. anticoagulants, implant):</label>
-      <input id="qr-note" type="text" class="block" placeholder="e.g., On warfarin; Pacemaker present" style="margin-top:6px; padding:.5rem;">
-    </div>
-
-    <details style="margin-top:1rem;">
-      <summary class="text-sm">Show data that will be encoded (read‑only)</summary>
-      <pre id="qr-payload-preview" class="text-sm" style="white-space: pre-wrap; background: #0b10211a; padding: .75rem; border-radius:8px; margin-top:.5rem;"></pre>
-    </details>
-  </div>
-
-  <div class="card">
-    <h2>Usage Tips</h2>
-    <ul class="text-sm">
-      <li>Print on a wallet card, phone lock‑screen, bracelet tag.</li>
-      <li>Use high contrast (dark code on white background).</li>
-      <li>Minimum size ~2–3 cm square for reliable scanning; test with multiple phones.[web:121][web:123]</li>
-      <li>Keep information concise; update after any medication/diagnosis change.[web:122][web:125]</li>
-    </ul>
-  </div>
-</section>
-<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
-<script src="app.js"></script>[1][2][3]
+    <script src="app.js"></script>
 </body>
 </html>
