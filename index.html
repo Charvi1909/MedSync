@@ -51,54 +51,51 @@
             <div class="page active" id="dashboard">
                 <div class="page-header">
                     <h1>Dashboard</h1>
-                    <p class="page-description">Get an overview of your health status and medications</p>
+                    <p>Get an overview of your health status and medications</p>
                 </div>
 
                 <div class="dashboard-grid">
-                    <!-- Overview Cards -->
                     <div class="overview-cards">
-                        <div class="card overview-card">
+                        <div class="card">
                             <div class="card-icon">
                                 <i class="fas fa-calendar-check"></i>
                             </div>
                             <div class="card-content">
                                 <h3>Last Test</h3>
-                                <p class="card-value" id="lastTestDate">Loading...</p>
+                                <p id="lastTestDate">No recent tests</p>
                             </div>
                         </div>
                         
-                        <div class="card overview-card">
+                        <div class="card">
                             <div class="card-icon">
                                 <i class="fas fa-pills"></i>
                             </div>
                             <div class="card-content">
                                 <h3>Active Medications</h3>
-                                <p class="card-value" id="activeMedications">Loading...</p>
+                                <p id="activeMedications">2</p>
                             </div>
                         </div>
                         
-                        <div class="card overview-card">
+                        <div class="card">
                             <div class="card-icon">
                                 <i class="fas fa-chart-line"></i>
                             </div>
                             <div class="card-content">
-                                <h3>Consistency Rate</h3>
-                                <p class="card-value" id="consistencyRate">Loading...</p>
+                                <h3>Adherence Rate</h3>
+                                <p id="consistencyRate">89%</p>
                             </div>
                         </div>
                     </div>
 
-                    <!-- AI Health Summary -->
                     <div class="card ai-summary">
                         <h3><i class="fas fa-robot"></i> AI Health Summary</h3>
-                        <p id="aiHealthSummary">Loading health insights...</p>
+                        <p id="aiHealthSummary">Based on your recent medication adherence and profile, your health metrics are showing positive trends. Continue taking your supplements as prescribed.</p>
                     </div>
 
-                    <!-- Today's Medications -->
                     <div class="card todays-medications">
                         <h3><i class="fas fa-clock"></i> Today's Medications</h3>
-                        <div class="medications-list" id="todaysMedications">
-                            Loading medications...
+                        <div id="todaysMedications">
+                            <!-- Will be populated by JavaScript -->
                         </div>
                     </div>
                 </div>
@@ -108,15 +105,15 @@
             <div class="page" id="lab-results">
                 <div class="page-header">
                     <h1>Lab Results</h1>
-                    <p class="page-description">Upload and manage your lab reports with AI analysis</p>
+                    <p>Upload and manage your lab reports with AI analysis</p>
                 </div>
 
                 <div class="lab-results-grid">
                     <div class="card upload-section">
                         <h3><i class="fas fa-upload"></i> Upload New Report</h3>
                         <div class="upload-zone" id="uploadZone">
-                            <div class="upload-content">
-                                <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                            <div class="upload-content" id="uploadContent">
+                                <i class="fas fa-cloud-upload-alt"></i>
                                 <p>Drop your lab report here or <span class="upload-browse">browse files</span></p>
                                 <p class="upload-hint">Supports PDF files up to 10MB</p>
                             </div>
@@ -125,7 +122,7 @@
                                 <div class="progress-bar">
                                     <div class="progress-fill"></div>
                                 </div>
-                                <p class="progress-text">Uploading...</p>
+                                <p class="progress-text">Processing your lab report...</p>
                             </div>
                         </div>
                     </div>
@@ -134,19 +131,21 @@
                         <h3><i class="fas fa-brain"></i> Current AI Analysis</h3>
                         <div class="analysis-info">
                             <div class="analysis-meta">
-                                <span class="test-type" id="currentTestType">Loading...</span>
-                                <span class="test-date" id="currentTestDate">Loading...</span>
+                                <span id="currentTestType">No analysis available</span>
+                                <span id="currentTestDate"></span>
                             </div>
                             <div class="analysis-content" id="currentAnalysis">
-                                Loading analysis...
+                                Upload a lab report to see AI-powered analysis of your results.
                             </div>
                         </div>
                     </div>
 
                     <div class="card analysis-history">
                         <h3><i class="fas fa-history"></i> Analysis History</h3>
-                        <div class="history-list" id="analysisHistory">
-                            Loading history...
+                        <div id="analysisHistory">
+                            <div class="empty-state">
+                                <p>No previous analyses available</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -156,14 +155,13 @@
             <div class="page" id="medications">
                 <div class="page-header">
                     <h1>Medications</h1>
-                    <p class="page-description">Manage your medications and track adherence</p>
-                    <button class="btn btn--primary" id="addMedicationBtn">
+                    <button class="btn btn-primary" id="addMedicationBtn">
                         <i class="fas fa-plus"></i> Add Medication
                     </button>
                 </div>
 
                 <div class="medications-grid" id="medicationsGrid">
-                    Loading medications...
+                    <!-- Will be populated by JavaScript -->
                 </div>
             </div>
 
@@ -171,20 +169,17 @@
             <div class="page" id="family-history">
                 <div class="page-header">
                     <h1>Family History</h1>
-                    <p class="page-description">Track family medical history and genetic risk factors</p>
-                    <button class="btn btn--primary" id="addFamilyMemberBtn">
+                    <button class="btn btn-primary" id="addFamilyMemberBtn">
                         <i class="fas fa-user-plus"></i> Add Family Member
                     </button>
                 </div>
 
-                <!-- Genetic Risk Warnings -->
                 <div class="genetic-warnings" id="geneticWarnings">
-                    <!-- Dynamic content will be inserted here -->
+                    <!-- Risk factors will be populated here -->
                 </div>
 
-                <!-- Family Members Grid -->
                 <div class="family-grid" id="familyGrid">
-                    Loading family members...
+                    <!-- Will be populated by JavaScript -->
                 </div>
             </div>
 
@@ -192,142 +187,59 @@
             <div class="page" id="profile">
                 <div class="page-header">
                     <h1>Profile</h1>
-                    <p class="page-description">Manage your personal and medical information</p>
+                    <p>Manage your personal and medical information</p>
                 </div>
 
                 <div class="profile-grid">
-                    <div class="card personal-info">
+                    <div class="card">
                         <h3><i class="fas fa-user"></i> Personal Information</h3>
-                        <form class="profile-form" id="personalInfoForm">
+                        <form id="personalInfoForm">
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label class="form-label">Full Name</label>
-                                    <input type="text" class="form-control" id="profileName" value="">
+                                    <label>Full Name</label>
+                                    <input type="text" id="profileName" value="Sarah Johnson">
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label">Age</label>
-                                    <input type="number" class="form-control" id="profileAge" value="">
+                                    <label>Age</label>
+                                    <input type="number" id="profileAge" value="32">
                                 </div>
                             </div>
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label class="form-label">Height</label>
-                                    <input type="text" class="form-control" id="profileHeight" value="">
+                                    <label>Height</label>
+                                    <input type="text" id="profileHeight" value="5'6&quot;">
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label">Weight</label>
-                                    <input type="text" class="form-control" id="profileWeight" value="">
+                                    <label>Weight</label>
+                                    <input type="text" id="profileWeight" value="145 lbs">
                                 </div>
                             </div>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label class="form-label">Gender</label>
-                                    <select class="form-control" id="profileGender">
-                                        <option value="Male">Male</option>
-                                        <option value="Female">Female</option>
-                                        <option value="Other">Other</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Blood Type</label>
-                                    <select class="form-control" id="profileBloodType">
-                                        <option value="A+">A+</option>
-                                        <option value="A-">A-</option>
-                                        <option value="B+">B+</option>
-                                        <option value="B-">B-</option>
-                                        <option value="AB+">AB+</option>
-                                        <option value="AB-">AB-</option>
-                                        <option value="O+">O+</option>
-                                        <option value="O-">O-</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <button type="submit" class="btn btn--primary">
+                            <button type="submit" class="btn btn-primary">
                                 <i class="fas fa-save"></i> Save Changes
                             </button>
                         </form>
                     </div>
 
-                    <div class="card medical-conditions">
+                    <div class="card">
                         <h3><i class="fas fa-stethoscope"></i> Medical Conditions</h3>
                         <div class="tags-container" id="conditionsTags"></div>
                         <div class="add-tag-form">
-                            <input type="text" class="form-control" id="newCondition" placeholder="Add new condition...">
-                            <button type="button" class="btn btn--secondary btn--sm" id="addConditionBtn">
+                            <input type="text" id="newCondition" placeholder="Add new condition...">
+                            <button type="button" class="btn btn-secondary" id="addConditionBtn">
                                 <i class="fas fa-plus"></i>
                             </button>
                         </div>
                     </div>
 
-                    <div class="card allergies">
+                    <div class="card">
                         <h3><i class="fas fa-exclamation-triangle"></i> Allergies</h3>
                         <div class="tags-container" id="allergiesTags"></div>
                         <div class="add-tag-form">
-                            <input type="text" class="form-control" id="newAllergy" placeholder="Add new allergy...">
-                            <button type="button" class="btn btn--secondary btn--sm" id="addAllergyBtn">
+                            <input type="text" id="newAllergy" placeholder="Add new allergy...">
+                            <button type="button" class="btn btn-secondary" id="addAllergyBtn">
                                 <i class="fas fa-plus"></i>
                             </button>
                         </div>
-                    </div>
-
-                    <div class="card emergency-contact">
-                        <h3><i class="fas fa-phone-alt"></i> Emergency Contact</h3>
-                        <form class="profile-form" id="emergencyContactForm">
-                            <div class="form-group">
-                                <label class="form-label">Name</label>
-                                <input type="text" class="form-control" id="emergencyName" value="">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Relation</label>
-                                <input type="text" class="form-control" id="emergencyRelation" value="">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Phone</label>
-                                <input type="tel" class="form-control" id="emergencyPhone" value="">
-                            </div>
-                            <button type="submit" class="btn btn--primary">
-                                <i class="fas fa-save"></i> Save Contact
-                            </button>
-                        </form>
-                    </div>
-
-                    <div class="card notification-preferences">
-                        <h3><i class="fas fa-bell"></i> Notification Preferences</h3>
-                        <form class="profile-form" id="notificationForm">
-                            <div class="form-group checkbox-group">
-                                <label class="checkbox-label">
-                                    <input type="checkbox" id="emailReminders">
-                                    <span class="checkmark"></span>
-                                    Email Reminders
-                                </label>
-                            </div>
-                            <div class="form-group checkbox-group">
-                                <label class="checkbox-label">
-                                    <input type="checkbox" id="pushNotifications">
-                                    <span class="checkmark"></span>
-                                    Push Notifications
-                                </label>
-                            </div>
-                            <div class="form-group checkbox-group">
-                                <label class="checkbox-label">
-                                    <input type="checkbox" id="soundAlerts">
-                                    <span class="checkmark"></span>
-                                    Sound Alerts
-                                </label>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Reminder Advance (minutes)</label>
-                                <select class="form-control" id="reminderAdvance">
-                                    <option value="15">15 minutes</option>
-                                    <option value="30">30 minutes</option>
-                                    <option value="60">1 hour</option>
-                                    <option value="120">2 hours</option>
-                                </select>
-                            </div>
-                            <button type="submit" class="btn btn--primary">
-                                <i class="fas fa-save"></i> Save Preferences
-                            </button>
-                        </form>
                     </div>
                 </div>
             </div>
@@ -346,57 +258,41 @@
             </div>
             <form class="modal-body" id="addMedicationForm">
                 <div class="form-group">
-                    <label class="form-label">Medication Name</label>
-                    <input type="text" class="form-control" id="medicationName" required>
+                    <label>Medication Name</label>
+                    <input type="text" id="medicationName" required>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label class="form-label">Dosage</label>
-                        <input type="number" class="form-control" id="medicationDosage" step="0.01" required>
+                        <label>Dosage</label>
+                        <input type="number" id="medicationDosage" step="0.01" required>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Unit</label>
-                        <select class="form-control" id="medicationUnit" required>
+                        <label>Unit</label>
+                        <select id="medicationUnit" required>
                             <option value="mg">mg</option>
                             <option value="g">g</option>
                             <option value="ml">ml</option>
                             <option value="IU">IU</option>
-                            <option value="mcg">mcg</option>
                         </select>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Frequency</label>
-                    <select class="form-control" id="medicationFrequency" required>
+                    <label>Frequency</label>
+                    <select id="medicationFrequency" required>
                         <option value="once_daily">Once Daily</option>
                         <option value="twice_daily">Twice Daily</option>
                         <option value="three_times_daily">Three Times Daily</option>
-                        <option value="four_times_daily">Four Times Daily</option>
-                        <option value="as_needed">As Needed</option>
                     </select>
                 </div>
-                <div class="form-group" id="timesContainer">
-                    <label class="form-label">Times</label>
-                    <div id="timeInputs">
-                        <input type="time" class="form-control time-input" required>
-                    </div>
-                </div>
                 <div class="form-group">
-                    <label class="form-label">Instructions</label>
-                    <textarea class="form-control" id="medicationInstructions" rows="3"></textarea>
-                </div>
-                <div class="form-group checkbox-group">
-                    <label class="checkbox-label">
-                        <input type="checkbox" id="medicationWithFood">
-                        <span class="checkmark"></span>
-                        Take with food
-                    </label>
+                    <label>Instructions</label>
+                    <textarea id="medicationInstructions" rows="3"></textarea>
                 </div>
             </form>
             <div class="modal-footer">
-                <button type="button" class="btn btn--secondary" id="cancelMedicationModal">Cancel</button>
-                <button type="submit" class="btn btn--primary" id="saveMedicationBtn">
-                    <i class="fas fa-save"></i> Save Medication
+                <button type="button" class="btn btn-secondary" id="cancelMedicationModal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="saveMedicationBtn">
+                    <i class="fas fa-save"></i> Save
                 </button>
             </div>
         </div>
@@ -407,7 +303,7 @@
         <div class="modal-overlay"></div>
         <div class="modal-content">
             <div class="modal-header">
-                <h3 id="familyModalTitle">Add Family Member</h3>
+                <h3>Add Family Member</h3>
                 <button class="modal-close" id="closeFamilyMemberModal">
                     <i class="fas fa-times"></i>
                 </button>
@@ -415,103 +311,37 @@
             <form class="modal-body" id="addFamilyMemberForm">
                 <div class="form-row">
                     <div class="form-group">
-                        <label class="form-label">Full Name</label>
-                        <input type="text" class="form-control" id="familyMemberName" required>
+                        <label>Full Name</label>
+                        <input type="text" id="familyMemberName" required>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Relationship</label>
-                        <select class="form-control" id="familyMemberRelationship" required>
+                        <label>Relationship</label>
+                        <select id="familyMemberRelationship" required>
                             <option value="">Select relationship</option>
                             <option value="Father">Father</option>
                             <option value="Mother">Mother</option>
                             <option value="Brother">Brother</option>
                             <option value="Sister">Sister</option>
-                            <option value="Paternal Grandfather">Paternal Grandfather</option>
-                            <option value="Paternal Grandmother">Paternal Grandmother</option>
-                            <option value="Maternal Grandfather">Maternal Grandfather</option>
-                            <option value="Maternal Grandmother">Maternal Grandmother</option>
-                            <option value="Son">Son</option>
-                            <option value="Daughter">Daughter</option>
-                            <option value="Uncle">Uncle</option>
-                            <option value="Aunt">Aunt</option>
-                            <option value="Cousin">Cousin</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">Age</label>
-                        <input type="number" class="form-control" id="familyMemberAge" min="0" max="120">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Status</label>
-                        <select class="form-control" id="familyMemberStatus" required>
-                            <option value="living">Living</option>
-                            <option value="deceased">Deceased</option>
+                            <option value="Grandfather">Grandfather</option>
+                            <option value="Grandmother">Grandmother</option>
                         </select>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Medical Conditions</label>
-                    <textarea class="form-control" id="familyMemberConditions" rows="3" placeholder="Enter conditions separated by commas"></textarea>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Allergies</label>
-                    <textarea class="form-control" id="familyMemberAllergies" rows="2" placeholder="Enter allergies separated by commas"></textarea>
+                    <label>Medical Conditions</label>
+                    <textarea id="familyMemberConditions" rows="3" placeholder="Enter conditions separated by commas"></textarea>
                 </div>
             </form>
             <div class="modal-footer">
-                <button type="button" class="btn btn--secondary" id="cancelFamilyMemberModal">Cancel</button>
-                <button type="submit" class="btn btn--primary" id="saveFamilyMemberBtn">
-                    <i class="fas fa-save"></i> Save Family Member
+                <button type="button" class="btn btn-secondary" id="cancelFamilyMemberModal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="saveFamilyMemberBtn">
+                    <i class="fas fa-save"></i> Save
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- Family Member Details Modal -->
-    <div class="modal hidden" id="familyMemberDetailsModal">
-        <div class="modal-overlay"></div>
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="familyDetailsTitle">Family Member Details</h3>
-                <button class="modal-close" id="closeFamilyDetailsModal">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="modal-body" id="familyDetailsContent">
-                <!-- Dynamic content will be inserted here -->
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn--secondary" id="editFamilyMemberBtn">
-                    <i class="fas fa-edit"></i> Edit
-                </button>
-                <button type="button" class="btn btn--secondary" id="closeFamilyDetailsBtn">Close</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Confirmation Modal -->
-    <div class="modal hidden" id="confirmModal">
-        <div class="modal-overlay"></div>
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="confirmTitle">Confirm Action</h3>
-                <button class="modal-close" id="closeConfirmModal">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="modal-body">
-                <p id="confirmMessage">Are you sure you want to perform this action?</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn--secondary" id="cancelConfirm">Cancel</button>
-                <button type="button" class="btn btn--primary" id="confirmAction">Confirm</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Toast Notifications -->
+    <!-- Toast Container -->
     <div class="toast-container" id="toastContainer"></div>
 
     <script src="app.js"></script>
