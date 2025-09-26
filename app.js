@@ -1202,3 +1202,185 @@ window.removeTag = removeTag;
 window.removeTimeInput = removeTimeInput;
 window.showMedicationModal = showMedicationModal;
 window.hideMedicationModal = hideMedicationModal;
+
+// ------- Emergency QR: data selection & QR generation -------
+
+// Build compact payload from current app state (adjust names to your state)
+function buildEmergencyPayload() {
+  // Assumes appData / medicalData exist in your app; adapt if needed
+  const data = (typeof appData !== 'undefined') ? appData : (typeof medicalData !== 'undefined' ? medicalData : null);
+  if (!data) return {};
+
+  const profile = data.patient || {};
+  const labs = data.labResults || {};
+  const meds = data.medications || [];
+
+  // Keep payload concise for reliability; include only essentials
+  const payload = {
+    type: "MED_EMERGENCY_V1",
+    generatedAt: new Date().toISOString(),
+    patient: {
+      name: profile.name || "",
+      age: profile.age || "",
+      gender: profile.gender || "",
+      bloodType: profile.bloodType || "",
+      conditions: (profile.conditions || []).slice(0, 8),
+      allergies: (profile.allergies || []).slice(0, 8),
+      emergencyContact: profile.emergencyContact || { name: "", relation: "", phone: "" }
+    },
+    medications: meds
+      .filter(m => m.active)
+      .slice(0, 8) // limit for QR density
+      .map(m => ({
+        name: m.name,
+        dose: `${m.dosage} ${m.unit}`,
+        schedule: m.frequency,
+        times: (m.times || []).slice(0, 3)
+      })),
+    latestLab: labs && labs.results ? {
+      testType: labs.testType || "",
+      date: labs.date || "",
+      // Include only key parameters to keep size small
+      parameters: (labs.results || [])
+        .slice(0, 6)
+        .map(r => ({
+          p: r.parameter,
+          v: r.value,
+          u: r.unit,
+          s: r.status
+        }))
+    } : null,
+    // Optional inline note from input
+    note: ""
+  };
+
+  // Insert note if present
+  const noteEl = document.getElementById('qr-note');
+  if (noteEl && noteEl.value && noteEl.value.trim().length > 0) {
+    payload.note = noteEl.value.trim().slice(0, 120);
+  } else {
+    delete payload.note;
+  }
+
+  return payload;
+}
+
+async function renderEmergencyQR() {
+  const container = document.getElementById('qr-canvas');
+  const preview = document.getElementById('qr-payload-preview');
+  if (!container) return;
+
+  // Clear previous QR
+  container.innerHTML = "";
+
+  const payload = buildEmergencyPayload();
+
+  // Show preview JSON for transparency
+  if (preview) {
+    preview.textContent = JSON.stringify(payload, null, 2);
+  }
+
+  // Keep QR compact: stringify and limit length if needed
+  let text = JSON.stringify(payload);
+
+  // Safety: if payload is too long (dense QR), trim meds/labs progressively
+  const MAX_LEN = 1600; // works well for most phone cameras
+  if (text.length > MAX_LEN) {
+    // Trim labs first
+    if (payload.latestLab && payload.latestLab.parameters) {
+      payload.latestLab.parameters = payload.latestLab.parameters.slice(0, 4);
+    }
+    // Trim meds
+    if (payload.medications) {
+      payload.medications = payload.medications.slice(0, 5);
+    }
+    text = JSON.stringify(payload);
+  }
+
+  // Generate QR with high error correction for emergency reliability
+  // Uses qrcode library (QRCode.toCanvas)
+  const canvas = document.createElement('canvas');
+  container.appendChild(canvas);
+
+  try {
+    await QRCode.toCanvas(canvas, text, {
+      errorCorrectionLevel: 'M',
+      margin: 2,
+      width: 256, // Adjust to your design; 256–384 px is a good balance
+      color: {
+        dark: '#000000',
+        light: '#ffffff'
+      }
+    });
+  } catch (e) {
+    console.error('QR generation failed', e);
+    container.innerHTML = "<p class='text-sm error'>Failed to generate QR</p>";
+  }
+}
+
+function downloadQRAsPNG() {
+  const container = document.getElementById('qr-canvas');
+  const canvas = container ? container.querySelector('canvas') : null;
+  if (!canvas) return;
+
+  const link = document.createElement('a');
+  link.download = `emergency-qr-${Date.now()}.png`;
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+}
+
+function printQR() {
+  const container = document.getElementById('qr-canvas');
+  const canvas = container ? container.querySelector('canvas') : null;
+  if (!canvas) return;
+
+  const dataUrl = canvas.toDataURL('image/png');
+  const win = window.open('', 'PRINT', 'height=600,width=800');
+  if (!win) return;
+  win.document.write(`
+    <html>
+      <head><title>Emergency QR</title></head>
+      <body style="margin:0; display:flex; align-items:center; justify-content:center; height:100vh; background:#fff;">
+        <img src="${dataUrl}" style="width:60mm; height:60mm; object-fit:contain;"/>
+      </body>
+    </html>
+  `);
+  win.document.close();
+  win.focus();
+  win.print();
+  // win.close(); // optionally close after print
+}
+
+// Wire up buttons
+function setupEmergencyQR() {
+  const genBtn = document.getElementById('btn-generate-qr');
+  const dlBtn = document.getElementById('btn-download-qr');
+  const prBtn = document.getElementById('btn-print-qr');
+  const noteEl = document.getElementById('qr-note');
+
+  if (genBtn) genBtn.addEventListener('click', renderEmergencyQR);
+  if (dlBtn) dlBtn.addEventListener('click', downloadQRAsPNG);
+  if (prBtn) prBtn.addEventListener('click', printQR);
+  if (noteEl) noteEl.addEventListener('input', () => {
+    // regenerate on note change (debounced minimal)
+    clearTimeout(window.__qrNoteTimer);
+    window.__qrNoteTimer = setTimeout(renderEmergencyQR, 400);
+  });
+
+  // Auto-generate on first visit to section
+  const emergencyLink = document.querySelector('[data-section="emergency-qr"]');
+  if (emergencyLink) {
+    emergencyLink.addEventListener('click', () => {
+      setTimeout(renderEmergencyQR, 100);
+    });
+  }
+}
+
+// Call after your existing init()
+(function initEmergencyQR() {
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupEmergencyQR);
+  } else {
+    setupEmergencyQR();
+  }
+})();
