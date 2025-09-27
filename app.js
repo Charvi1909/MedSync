@@ -1,48 +1,14 @@
-// Enhanced MedSync JavaScript with Report Sharing and Markdown Rendering
+// Clean MedSync JavaScript with Genetic Risk Assessment
 const AppState = {
     currentPage: 'dashboard',
-    medications: [
-        {
-            id: "1",
-            name: "Iron Supplement",
-            dosage: 65,
-            unit: "mg",
-            frequency: "twice_daily",
-            instructions: "Take with food",
-            nextDose: "8:00 PM",
-            taken: false
-        },
-        {
-            id: "2",
-            name: "Vitamin D3",
-            dosage: 1000,
-            unit: "IU",
-            frequency: "once_daily",
-            instructions: "Take with breakfast",
-            nextDose: "9:00 AM tomorrow",
-            taken: false
-        }
-    ],
-    familyMembers: [
-        {
-            id: "1",
-            name: "Robert Johnson",
-            relationship: "Father",
-            conditions: ["Hypertension", "Diabetes Type 2"]
-        },
-        {
-            id: "2",
-            name: "Margaret Johnson",
-            relationship: "Mother",
-            conditions: ["Osteoporosis"]
-        }
-    ],
+    medications: [],
+    familyMembers: [],
     labResults: [],
     sharedReports: [],
     currentAnalysis: null,
     profile: {
-        conditions: ["Anemia", "Vitamin D Deficiency"],
-        allergies: ["Penicillin", "Shellfish"]
+        conditions: [],
+        allergies: []
     }
 };
 
@@ -54,48 +20,140 @@ const API_CONFIG = {
     }
 };
 
-// Report Database (using localStorage for demo - replace with actual database)
+// Genetic Risk Database - Simplified for reliability
+const GeneticRiskDatabase = {
+    conditions: {
+        "diabetes type 2": {
+            displayName: "Diabetes Type 2",
+            populationRisk: 11.2,
+            familyRisk: 40,
+            recommendations: [
+                "Regular glucose screening every 3 years starting at age 35",
+                "Maintain healthy weight (BMI < 25)",
+                "Exercise at least 150 minutes per week",
+                "Follow Mediterranean or DASH diet pattern"
+            ],
+            warningSigns: [
+                "Increased thirst and frequent urination",
+                "Unexplained weight loss",
+                "Extreme fatigue",
+                "Blurred vision"
+            ]
+        },
+        "hypertension": {
+            displayName: "Hypertension (High Blood Pressure)",
+            populationRisk: 45,
+            familyRisk: 60,
+            recommendations: [
+                "Regular blood pressure monitoring",
+                "Reduce sodium intake to <2300mg/day",
+                "Regular aerobic exercise",
+                "Maintain healthy weight"
+            ],
+            warningSigns: [
+                "Often no symptoms (silent killer)",
+                "Severe headaches",
+                "Shortness of breath",
+                "Chest pain"
+            ]
+        },
+        "heart disease": {
+            displayName: "Heart Disease",
+            populationRisk: 6.5,
+            familyRisk: 40,
+            recommendations: [
+                "Cholesterol screening every 5 years",
+                "Regular cardiovascular exercise",
+                "Heart-healthy diet",
+                "Don't smoke"
+            ],
+            warningSigns: [
+                "Chest pain or discomfort",
+                "Shortness of breath",
+                "Irregular heartbeat",
+                "Fatigue"
+            ]
+        },
+        "breast cancer": {
+            displayName: "Breast Cancer",
+            populationRisk: 12.5,
+            familyRisk: 17,
+            recommendations: [
+                "Mammograms annually starting at age 40",
+                "Clinical breast exams annually",
+                "Maintain healthy weight",
+                "Limit alcohol consumption"
+            ],
+            warningSigns: [
+                "New lump in breast or armpit",
+                "Changes in breast size or shape",
+                "Skin dimpling or puckering",
+                "Nipple discharge"
+            ]
+        }
+    },
+
+    calculateRisk(conditionName, familyHistory) {
+        const condition = this.conditions[conditionName.toLowerCase()];
+        
+        if (!condition) {
+            return {
+                riskLevel: "N/A",
+                riskDescription: "No genetic data available for this condition",
+                recommendations: ["Consult with a healthcare provider"],
+                warningSigns: []
+            };
+        }
+
+        const hasAffectedFamily = familyHistory.some(member => 
+            member.conditions.some(c => 
+                c.toLowerCase().includes(conditionName.toLowerCase().split(' ')[0])
+            )
+        );
+
+        if (hasAffectedFamily) {
+            const riskIncrease = condition.familyRisk - condition.populationRisk;
+            let riskLevel = "Moderate";
+            
+            if (riskIncrease >= 20) riskLevel = "High";
+            else if (riskIncrease >= 10) riskLevel = "Moderate";
+            else riskLevel = "Low-Moderate";
+
+            return {
+                riskLevel: riskLevel,
+                riskDescription: `${riskLevel} risk (${condition.familyRisk}%) due to family history. Population risk is ${condition.populationRisk}%.`,
+                recommendations: condition.recommendations,
+                warningSigns: condition.warningSigns || []
+            };
+        }
+
+        return {
+            riskLevel: "Population Level",
+            riskDescription: `Standard population risk (${condition.populationRisk}%). No family history of this condition.`,
+            recommendations: ["Follow standard screening guidelines"],
+            warningSigns: []
+        };
+    }
+};
+
+// Report Database (using localStorage)
 const ReportDB = {
     async saveReport(reportData) {
         try {
-            // Generate unique report ID
             const reportId = generateId();
             const report = {
                 id: reportId,
                 ...reportData,
                 createdAt: new Date().toISOString(),
-                expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() // 30 days
+                expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
             };
             
-            // Save to localStorage (replace with actual database call)
             const reports = JSON.parse(localStorage.getItem('medSyncReports') || '[]');
             reports.push(report);
             localStorage.setItem('medSyncReports', JSON.stringify(reports));
             
             return { success: true, reportId, shareUrl: `${window.location.origin}/report/${reportId}` };
         } catch (error) {
-            console.error('Error saving report:', error);
-            return { success: false, error: error.message };
-        }
-    },
-
-    async getReport(reportId) {
-        try {
-            const reports = JSON.parse(localStorage.getItem('medSyncReports') || '[]');
-            const report = reports.find(r => r.id === reportId);
-            
-            if (!report) {
-                return { success: false, error: 'Report not found' };
-            }
-            
-            // Check if report has expired
-            if (new Date(report.expiresAt) < new Date()) {
-                return { success: false, error: 'Report has expired' };
-            }
-            
-            return { success: true, report };
-        } catch (error) {
-            console.error('Error retrieving report:', error);
             return { success: false, error: error.message };
         }
     },
@@ -103,11 +161,9 @@ const ReportDB = {
     async getUserReports() {
         try {
             const reports = JSON.parse(localStorage.getItem('medSyncReports') || '[]');
-            // Filter out expired reports
             const validReports = reports.filter(r => new Date(r.expiresAt) >= new Date());
             return { success: true, reports: validReports };
         } catch (error) {
-            console.error('Error getting user reports:', error);
             return { success: false, error: error.message };
         }
     }
@@ -118,27 +174,19 @@ function convertMarkdownToHTML(markdown) {
     if (!markdown) return '';
     
     let html = markdown
-        // Remove markdown symbols and replace with HTML
         .replace(/### (.*?)$/gm, '<h3>$1</h3>')
         .replace(/#### (.*?)$/gm, '<h4>$1</h4>')
         .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
         .replace(/\*(.*?)\*/g, '<em>$1</em>')
         .replace(/^\- (.*?)$/gm, '<li>$1</li>')
-        .replace(/^(\d+)\. (.*?)$/gm, '<li>$1. $2</li>')
         .replace(/---+/g, '<hr>')
         .replace(/\n\n/g, '</p><p>')
         .replace(/\n/g, '<br>');
     
-    // Wrap in paragraph tags
     html = '<p>' + html + '</p>';
-    
-    // Fix multiple paragraph tags
     html = html.replace(/<p><\/p>/g, '');
     html = html.replace(/<p><h/g, '<h');
     html = html.replace(/<\/h(\d)><\/p>/g, '</h$1>');
-    html = html.replace(/<p><hr><\/p>/g, '<hr>');
-    
-    // Wrap list items in ul tags
     html = html.replace(/(<li>.*?<\/li>)/gs, '<ul>$1</ul>');
     html = html.replace(/<\/ul>\s*<ul>/g, '');
     
@@ -181,11 +229,9 @@ function initNavigation() {
         item.addEventListener('click', () => {
             const page = item.dataset.page;
             
-            // Update active menu item
             menuItems.forEach(i => i.classList.remove('active'));
             item.classList.add('active');
             
-            // Show page
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById(page).classList.add('active');
             
@@ -194,7 +240,7 @@ function initNavigation() {
         });
     });
 
-    if (sidebarToggle) {
+    if (sidebarToggle && sidebar) {
         sidebarToggle.addEventListener('click', () => {
             sidebar.classList.toggle('open');
         });
@@ -252,7 +298,7 @@ function renderDashboard() {
             todaysMedications.innerHTML = '<div class="empty-state"><p>No medications scheduled</p></div>';
         } else {
             todaysMedications.innerHTML = AppState.medications.map(med => `
-                <div class="medication-item" style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid var(--border);">
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid var(--border);">
                     <div>
                         <h4 style="margin: 0; font-size: 1rem;">${med.name}</h4>
                         <p style="margin: 0; font-size: 0.875rem; color: var(--text-secondary);">${med.dosage} ${med.unit} - ${med.instructions}</p>
@@ -264,7 +310,7 @@ function renderDashboard() {
     }
 
     if (aiHealthSummary) {
-        let summary = 'Based on your medication adherence and profile, your health metrics are showing positive trends.';
+        let summary = 'Based on your medication consistency, your health metrics are showing positive trends.';
         if (AppState.labResults.length > 0) {
             summary = `Recent lab analysis: ${AppState.labResults[0].summary.substring(0, 150)}...`;
         }
@@ -291,14 +337,8 @@ function initLabResults() {
         if (file) handleFileUpload(file);
     });
 
-    // Share report functionality
-    if (shareReportBtn) {
-        shareReportBtn.addEventListener('click', shareCurrentReport);
-    }
-
-    if (copyLinkBtn) {
-        copyLinkBtn.addEventListener('click', copyReportLink);
-    }
+    if (shareReportBtn) shareReportBtn.addEventListener('click', shareCurrentReport);
+    if (copyLinkBtn) copyLinkBtn.addEventListener('click', copyReportLink);
 
     // Drag and drop
     uploadZone.addEventListener('dragover', (e) => {
@@ -316,13 +356,8 @@ function initLabResults() {
         uploadZone.classList.remove('dragover');
         
         const files = e.dataTransfer.files;
-        if (files.length > 0) {
-            const file = files[0];
-            if (file.type === 'application/pdf') {
-                handleFileUpload(file);
-            } else {
-                showToast('Please upload a PDF file', 'error');
-            }
+        if (files.length > 0 && files[0].type === 'application/pdf') {
+            handleFileUpload(files[0]);
         }
     });
 }
@@ -388,10 +423,7 @@ function startProgressAnimation() {
         progressFill.style.width = '80%';
         progressText.textContent = 'Generating summary...';
     }, 1600);
-    setTimeout(() => {
-        progressFill.style.width = '95%';
-        progressText.textContent = 'Finalizing...';
-    }, 2400);
+    setTimeout(() => progressFill.style.width = '95%', 2400);
 }
 
 function resetProgress() {
@@ -431,22 +463,13 @@ function displayAnalysis(summary, fileName) {
     if (currentTestDate) currentTestDate.textContent = formatDate(new Date());
     
     if (currentAnalysis) {
-        // Convert markdown to HTML for better display
         const htmlContent = convertMarkdownToHTML(summary);
         currentAnalysis.innerHTML = htmlContent;
     }
 
-    // Store current analysis for sharing
-    AppState.currentAnalysis = {
-        fileName: fileName,
-        summary: summary,
-        date: new Date().toISOString()
-    };
+    AppState.currentAnalysis = { fileName, summary, date: new Date().toISOString() };
 
-    // Show sharing actions
-    if (analysisActions) {
-        analysisActions.classList.remove('hidden');
-    }
+    if (analysisActions) analysisActions.classList.remove('hidden');
 }
 
 async function shareCurrentReport() {
@@ -457,35 +480,14 @@ async function shareCurrentReport() {
 
     try {
         const result = await ReportDB.saveReport(AppState.currentAnalysis);
-        
         if (result.success) {
-            // Add to shared reports
-            AppState.sharedReports.unshift({
-                id: result.reportId,
-                fileName: AppState.currentAnalysis.fileName,
-                shareUrl: result.shareUrl,
-                createdAt: new Date().toISOString()
-            });
-
-            // Show share modal
             showShareModal(result.shareUrl);
             showToast('Report shared successfully!', 'success');
         } else {
             showToast('Failed to share report', 'error');
         }
     } catch (error) {
-        console.error('Error sharing report:', error);
         showToast('Failed to share report', 'error');
-    }
-}
-
-function showShareModal(shareUrl) {
-    const modal = document.getElementById('shareReportModal');
-    const shareLink = document.getElementById('shareReportLink');
-    
-    if (modal && shareLink) {
-        shareLink.value = shareUrl;
-        modal.classList.remove('hidden');
     }
 }
 
@@ -497,16 +499,22 @@ async function copyReportLink() {
 
     try {
         const result = await ReportDB.saveReport(AppState.currentAnalysis);
-        
         if (result.success) {
             await navigator.clipboard.writeText(result.shareUrl);
             showToast('Link copied to clipboard!', 'success');
-        } else {
-            showToast('Failed to generate link', 'error');
         }
     } catch (error) {
-        console.error('Error copying link:', error);
         showToast('Failed to copy link', 'error');
+    }
+}
+
+function showShareModal(shareUrl) {
+    const modal = document.getElementById('shareReportModal');
+    const shareLink = document.getElementById('shareReportLink');
+    
+    if (modal && shareLink) {
+        shareLink.value = shareUrl;
+        modal.classList.remove('hidden');
     }
 }
 
@@ -539,144 +547,7 @@ function renderHistory() {
     `).join('');
 }
 
-// Reports Page
-function initReports() {
-    const generateLinkBtn = document.getElementById('generateLinkBtn');
-    const reportLink = document.getElementById('reportLink');
-
-    if (generateLinkBtn) {
-        generateLinkBtn.addEventListener('click', async () => {
-            if (!AppState.currentAnalysis) {
-                showToast('No analysis available to share. Upload a lab report first.', 'error');
-                return;
-            }
-
-            try {
-                const result = await ReportDB.saveReport(AppState.currentAnalysis);
-                
-                if (result.success) {
-                    reportLink.value = result.shareUrl;
-                    
-                    // Add to shared reports
-                    AppState.sharedReports.unshift({
-                        id: result.reportId,
-                        fileName: AppState.currentAnalysis.fileName,
-                        shareUrl: result.shareUrl,
-                        createdAt: new Date().toISOString()
-                    });
-                    
-                    renderSharedReports();
-                    showToast('Share link generated!', 'success');
-                } else {
-                    showToast('Failed to generate link', 'error');
-                }
-            } catch (error) {
-                console.error('Error generating link:', error);
-                showToast('Failed to generate link', 'error');
-            }
-        });
-    }
-}
-
-async function renderReports() {
-    try {
-        const result = await ReportDB.getUserReports();
-        
-        if (result.success) {
-            AppState.sharedReports = result.reports;
-            renderSharedReports();
-        }
-    } catch (error) {
-        console.error('Error loading reports:', error);
-    }
-}
-
-function renderSharedReports() {
-    const container = document.getElementById('sharedReportsList');
-    if (!container) return;
-
-    if (AppState.sharedReports.length === 0) {
-        container.innerHTML = '<div class="empty-state"><p>No shared reports yet</p></div>';
-        return;
-    }
-
-    container.innerHTML = AppState.sharedReports.map(report => `
-        <div class="shared-report-item" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 0.5rem;">
-            <div>
-                <h4 style="margin: 0; font-size: 1rem;">${report.fileName}</h4>
-                <p style="margin: 0; font-size: 0.875rem; color: var(--text-secondary);">
-                    Shared on ${formatDate(report.createdAt)}
-                </p>
-            </div>
-            <div style="display: flex; gap: 0.5rem;">
-                <button class="btn btn-secondary btn-sm" onclick="copyToClipboard('${report.shareUrl}')">
-                    <i class="fas fa-copy"></i> Copy
-                </button>
-                <button class="btn btn-outline btn-sm" onclick="deleteSharedReport('${report.id}')">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </div>
-        </div>
-    `).join('');
-}
-
-async function copyToClipboard(text) {
-    try {
-        await navigator.clipboard.writeText(text);
-        showToast('Link copied to clipboard!', 'success');
-    } catch (error) {
-        showToast('Failed to copy link', 'error');
-    }
-}
-
-function deleteSharedReport(reportId) {
-    AppState.sharedReports = AppState.sharedReports.filter(r => r.id !== reportId);
-    renderSharedReports();
-    showToast('Shared report deleted', 'success');
-}
-
-// Initialize share modal handlers
-function initShareModal() {
-    const closeShareModal = document.getElementById('closeShareModal');
-    const closeShareModalBtn = document.getElementById('closeShareModalBtn');
-    const copyShareLinkBtn = document.getElementById('copyShareLinkBtn');
-    const shareModal = document.getElementById('shareReportModal');
-
-    if (closeShareModal) {
-        closeShareModal.addEventListener('click', () => {
-            shareModal.classList.add('hidden');
-        });
-    }
-
-    if (closeShareModalBtn) {
-        closeShareModalBtn.addEventListener('click', () => {
-            shareModal.classList.add('hidden');
-        });
-    }
-
-    if (copyShareLinkBtn) {
-        copyShareLinkBtn.addEventListener('click', async () => {
-            const shareLink = document.getElementById('shareReportLink');
-            try {
-                await navigator.clipboard.writeText(shareLink.value);
-                showToast('Link copied to clipboard!', 'success');
-            } catch (error) {
-                showToast('Failed to copy link', 'error');
-            }
-        });
-    }
-
-    // Close on overlay click
-    if (shareModal) {
-        shareModal.addEventListener('click', (e) => {
-            if (e.target === shareModal || e.target.classList.contains('modal-overlay')) {
-                shareModal.classList.add('hidden');
-            }
-        });
-    }
-}
-
-// Medications (keeping existing code)
+// Medications
 function initMedications() {
     const addBtn = document.getElementById('addMedicationBtn');
     const modal = document.getElementById('addMedicationModal');
@@ -689,7 +560,6 @@ function initMedications() {
     if (cancelBtn) cancelBtn.addEventListener('click', () => closeModal('addMedicationModal'));
     if (saveBtn) saveBtn.addEventListener('click', saveMedication);
 
-    // Close on overlay click
     if (modal) {
         modal.addEventListener('click', (e) => {
             if (e.target === modal || e.target.classList.contains('modal-overlay')) {
@@ -743,7 +613,7 @@ function renderMedications() {
     if (!container) return;
 
     if (AppState.medications.length === 0) {
-        container.innerHTML = '<div class="empty-state"><p>No medications added yet. Click "Add Medication" to get started.</p></div>';
+        container.innerHTML = '<div class="empty-state"><p>No medications added yet.</p></div>';
         return;
     }
 
@@ -816,7 +686,7 @@ function formatFrequency(frequency) {
     return frequencies[frequency] || frequency;
 }
 
-// Family History (keeping existing code)
+// Family History with Genetic Risk Assessment
 function initFamilyHistory() {
     const addBtn = document.getElementById('addFamilyMemberBtn');
     const modal = document.getElementById('addFamilyMemberModal');
@@ -829,7 +699,6 @@ function initFamilyHistory() {
     if (cancelBtn) cancelBtn.addEventListener('click', () => closeModal('addFamilyMemberModal'));
     if (saveBtn) saveBtn.addEventListener('click', saveFamilyMember);
 
-    // Close on overlay click
     if (modal) {
         modal.addEventListener('click', (e) => {
             if (e.target === modal || e.target.classList.contains('modal-overlay')) {
@@ -898,41 +767,126 @@ function updateGeneticRisks() {
     const container = document.getElementById('geneticWarnings');
     if (!container) return;
 
-    const conditionCounts = {};
+    if (AppState.familyMembers.length === 0) {
+        container.innerHTML = `
+            <div class="card">
+                <h3><i class="fas fa-info-circle"></i> Genetic Risk Assessment</h3>
+                <p>Add family members with their medical conditions to see personalized genetic risk assessments.</p>
+                <p><strong>Available genetic data for:</strong> Diabetes Type 2, Hypertension, Heart Disease, Breast Cancer</p>
+            </div>
+        `;
+        return;
+    }
+
+    // Get all unique conditions from family history
+    const allConditions = new Set();
     AppState.familyMembers.forEach(member => {
         member.conditions.forEach(condition => {
-            const key = condition.toLowerCase();
-            conditionCounts[key] = (conditionCounts[key] || 0) + 1;
+            allConditions.add(condition.toLowerCase().trim());
         });
     });
 
-    const riskConditions = Object.entries(conditionCounts)
-        .filter(([, count]) => count >= 1)
-        .map(([condition, count]) => ({
-            condition: condition.charAt(0).toUpperCase() + condition.slice(1),
-            level: count >= 2 ? 'high' : 'moderate'
-        }));
-
-    if (riskConditions.length === 0) {
+    if (allConditions.size === 0) {
         container.innerHTML = `
             <div class="card">
-                <h3><i class="fas fa-info-circle"></i> Genetic Risk Factors</h3>
-                <p>No genetic risk factors identified. Add family medical history to see risk assessments.</p>
+                <h3><i class="fas fa-info-circle"></i> Genetic Risk Assessment</h3>
+                <p>Family members added but no medical conditions specified. Add conditions to see risk assessments.</p>
             </div>
         `;
-    } else {
-        container.innerHTML = `
-            <div class="card">
-                <h3><i class="fas fa-exclamation-triangle"></i> Genetic Risk Factors</h3>
-                ${riskConditions.map(risk => `
-                    <div class="risk-item">
-                        <span class="risk-condition">${risk.condition}</span>
-                        <span class="status ${risk.level}">${risk.level} Risk</span>
-                    </div>
-                `).join('')}
-            </div>
-        `;
+        return;
     }
+
+    const riskAssessments = [];
+    
+    // Check each condition against our database
+    ['diabetes type 2', 'hypertension', 'heart disease', 'breast cancer'].forEach(condition => {
+        const riskData = GeneticRiskDatabase.calculateRisk(condition, AppState.familyMembers);
+        
+        if (riskData.riskLevel !== "N/A" && riskData.riskLevel !== "Population Level") {
+            riskAssessments.push({
+                condition: GeneticRiskDatabase.conditions[condition].displayName,
+                ...riskData
+            });
+        }
+    });
+
+    if (riskAssessments.length === 0) {
+        container.innerHTML = `
+            <div class="card">
+                <h3><i class="fas fa-info-circle"></i> Genetic Risk Assessment</h3>
+                <p style="color: var(--warning-color);">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    No genetic risk data available for the conditions in your family history.
+                </p>
+                <div style="background: #f8f9fa; padding: 1rem; border-radius: 6px; margin-top: 1rem;">
+                    <p><strong>Conditions in your family:</strong></p>
+                    <ul style="margin: 0.5rem 0; padding-left: 1.5rem;">
+                        ${Array.from(allConditions).map(condition => `<li style="text-transform: capitalize;">${condition}</li>`).join('')}
+                    </ul>
+                    <p style="font-size: 0.9rem; color: var(--text-secondary); margin-top: 1rem;">
+                        We have genetic risk data for: Diabetes Type 2, Hypertension, Heart Disease, and Breast Cancer.
+                    </p>
+                </div>
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = `
+        <div class="card">
+            <h3><i class="fas fa-dna"></i> Genetic Risk Assessment</h3>
+            <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1.5rem;">
+                Based on your family medical history:
+            </p>
+            
+            ${riskAssessments.map(risk => `
+                <div style="margin-bottom: 2rem; border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+                        <div>
+                            <h4 style="margin: 0; color: var(--text-color);">${risk.condition}</h4>
+                        </div>
+                        <span style="padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.8rem; font-weight: 600; 
+                                     background: ${risk.riskLevel === 'High' ? '#fef3c7' : '#dbeafe'}; 
+                                     color: ${risk.riskLevel === 'High' ? '#d97706' : '#2563eb'};">
+                            ${risk.riskLevel} Risk
+                        </span>
+                    </div>
+                    
+                    <div style="margin-bottom: 1rem;">
+                        <p style="margin: 0; color: var(--text-color); font-weight: 500;">${risk.riskDescription}</p>
+                    </div>
+                    
+                    <details style="margin-bottom: 1rem;">
+                        <summary style="cursor: pointer; font-weight: 600; color: var(--primary-color); margin-bottom: 0.5rem;">
+                            <i class="fas fa-lightbulb"></i> Preventive Recommendations
+                        </summary>
+                        <ul style="margin: 0.5rem 0; padding-left: 1.5rem; font-size: 0.9rem;">
+                            ${risk.recommendations.map(rec => `<li style="margin: 0.25rem 0;">${rec}</li>`).join('')}
+                        </ul>
+                    </details>
+                    
+                    ${risk.warningSigns && risk.warningSigns.length > 0 ? `
+                        <details>
+                            <summary style="cursor: pointer; font-weight: 600; color: var(--warning-color); margin-bottom: 0.5rem;">
+                                <i class="fas fa-exclamation-triangle"></i> Warning Signs
+                            </summary>
+                            <ul style="margin: 0.5rem 0; padding-left: 1.5rem; font-size: 0.9rem;">
+                                ${risk.warningSigns.map(sign => `<li style="margin: 0.25rem 0;">${sign}</li>`).join('')}
+                            </ul>
+                        </details>
+                    ` : ''}
+                </div>
+            `).join('')}
+            
+            <div style="background: #f0f9ff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 1rem; margin-top: 1.5rem;">
+                <p style="margin: 0; font-size: 0.9rem; color: var(--primary-color);">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>Note:</strong> These assessments are based on family history and population data. 
+                    Consult with a healthcare provider for personalized medical advice.
+                </p>
+            </div>
+        </div>
+    `;
 }
 
 function deleteFamilyMember(id) {
@@ -945,7 +899,76 @@ function deleteFamilyMember(id) {
     }
 }
 
-// Profile (keeping existing code)
+// Reports
+function initReports() {
+    const generateLinkBtn = document.getElementById('generateLinkBtn');
+    if (generateLinkBtn) {
+        generateLinkBtn.addEventListener('click', async () => {
+            if (!AppState.currentAnalysis) {
+                showToast('No analysis available. Upload a lab report first.', 'error');
+                return;
+            }
+
+            try {
+                const result = await ReportDB.saveReport(AppState.currentAnalysis);
+                if (result.success) {
+                    const reportLink = document.getElementById('reportLink');
+                    if (reportLink) reportLink.value = result.shareUrl;
+                    showToast('Share link generated!', 'success');
+                }
+            } catch (error) {
+                showToast('Failed to generate link', 'error');
+            }
+        });
+    }
+}
+
+async function renderReports() {
+    try {
+        const result = await ReportDB.getUserReports();
+        if (result.success) {
+            AppState.sharedReports = result.reports;
+            renderSharedReports();
+        }
+    } catch (error) {
+        console.error('Error loading reports:', error);
+    }
+}
+
+function renderSharedReports() {
+    const container = document.getElementById('sharedReportsList');
+    if (!container) return;
+
+    if (AppState.sharedReports.length === 0) {
+        container.innerHTML = '<div class="empty-state"><p>No shared reports yet</p></div>';
+        return;
+    }
+
+    container.innerHTML = AppState.sharedReports.map(report => `
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 0.5rem;">
+            <div>
+                <h4 style="margin: 0; font-size: 1rem;">${report.fileName}</h4>
+                <p style="margin: 0; font-size: 0.875rem; color: var(--text-secondary);">
+                    Shared on ${formatDate(report.createdAt)}
+                </p>
+            </div>
+            <button class="btn btn-secondary" onclick="copyToClipboard('${report.shareUrl}')">
+                <i class="fas fa-copy"></i> Copy
+            </button>
+        </div>
+    `).join('');
+}
+
+async function copyToClipboard(text) {
+    try {
+        await navigator.clipboard.writeText(text);
+        showToast('Link copied to clipboard!', 'success');
+    } catch (error) {
+        showToast('Failed to copy link', 'error');
+    }
+}
+
+// Profile
 function initProfile() {
     const personalForm = document.getElementById('personalInfoForm');
     const addConditionBtn = document.getElementById('addConditionBtn');
@@ -1024,12 +1047,47 @@ function removeAllergy(allergy) {
     showToast('Allergy removed!', 'success');
 }
 
+// Share modal handlers
+function initShareModal() {
+    const closeShareModal = document.getElementById('closeShareModal');
+    const closeShareModalBtn = document.getElementById('closeShareModalBtn');
+    const copyShareLinkBtn = document.getElementById('copyShareLinkBtn');
+    const shareModal = document.getElementById('shareReportModal');
+
+    if (closeShareModal) {
+        closeShareModal.addEventListener('click', () => shareModal.classList.add('hidden'));
+    }
+
+    if (closeShareModalBtn) {
+        closeShareModalBtn.addEventListener('click', () => shareModal.classList.add('hidden'));
+    }
+
+    if (copyShareLinkBtn) {
+        copyShareLinkBtn.addEventListener('click', async () => {
+            const shareLink = document.getElementById('shareReportLink');
+            try {
+                await navigator.clipboard.writeText(shareLink.value);
+                showToast('Link copied to clipboard!', 'success');
+            } catch (error) {
+                showToast('Failed to copy link', 'error');
+            }
+        });
+    }
+
+    if (shareModal) {
+        shareModal.addEventListener('click', (e) => {
+            if (e.target === shareModal || e.target.classList.contains('modal-overlay')) {
+                shareModal.classList.add('hidden');
+            }
+        });
+    }
+}
+
 // Utilities
 function closeModal(modalId) {
     const modal = document.getElementById(modalId);
     if (modal) {
         modal.classList.add('hidden');
-        // Reset form
         const form = modal.querySelector('form');
         if (form) form.reset();
     }
@@ -1045,7 +1103,6 @@ document.addEventListener('DOMContentLoaded', () => {
     initReports();
     initShareModal();
     
-    // Load initial page
     loadPage(AppState.currentPage);
     
     console.log('MedSync initialized successfully');
