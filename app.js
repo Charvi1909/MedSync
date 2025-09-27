@@ -1,4 +1,4 @@
-// Lightweight MedSync JavaScript
+// Enhanced MedSync JavaScript with Report Sharing and Markdown Rendering
 const AppState = {
     currentPage: 'dashboard',
     medications: [
@@ -38,6 +38,8 @@ const AppState = {
         }
     ],
     labResults: [],
+    sharedReports: [],
+    currentAnalysis: null,
     profile: {
         conditions: ["Anemia", "Vitamin D Deficiency"],
         allergies: ["Penicillin", "Shellfish"]
@@ -51,6 +53,97 @@ const API_CONFIG = {
         summarize: '/summarize'
     }
 };
+
+// Report Database (using localStorage for demo - replace with actual database)
+const ReportDB = {
+    async saveReport(reportData) {
+        try {
+            // Generate unique report ID
+            const reportId = generateId();
+            const report = {
+                id: reportId,
+                ...reportData,
+                createdAt: new Date().toISOString(),
+                expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() // 30 days
+            };
+            
+            // Save to localStorage (replace with actual database call)
+            const reports = JSON.parse(localStorage.getItem('medSyncReports') || '[]');
+            reports.push(report);
+            localStorage.setItem('medSyncReports', JSON.stringify(reports));
+            
+            return { success: true, reportId, shareUrl: `${window.location.origin}/report/${reportId}` };
+        } catch (error) {
+            console.error('Error saving report:', error);
+            return { success: false, error: error.message };
+        }
+    },
+
+    async getReport(reportId) {
+        try {
+            const reports = JSON.parse(localStorage.getItem('medSyncReports') || '[]');
+            const report = reports.find(r => r.id === reportId);
+            
+            if (!report) {
+                return { success: false, error: 'Report not found' };
+            }
+            
+            // Check if report has expired
+            if (new Date(report.expiresAt) < new Date()) {
+                return { success: false, error: 'Report has expired' };
+            }
+            
+            return { success: true, report };
+        } catch (error) {
+            console.error('Error retrieving report:', error);
+            return { success: false, error: error.message };
+        }
+    },
+
+    async getUserReports() {
+        try {
+            const reports = JSON.parse(localStorage.getItem('medSyncReports') || '[]');
+            // Filter out expired reports
+            const validReports = reports.filter(r => new Date(r.expiresAt) >= new Date());
+            return { success: true, reports: validReports };
+        } catch (error) {
+            console.error('Error getting user reports:', error);
+            return { success: false, error: error.message };
+        }
+    }
+};
+
+// Markdown to HTML converter
+function convertMarkdownToHTML(markdown) {
+    if (!markdown) return '';
+    
+    let html = markdown
+        // Remove markdown symbols and replace with HTML
+        .replace(/### (.*?)$/gm, '<h3>$1</h3>')
+        .replace(/#### (.*?)$/gm, '<h4>$1</h4>')
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+        .replace(/^\- (.*?)$/gm, '<li>$1</li>')
+        .replace(/^(\d+)\. (.*?)$/gm, '<li>$1. $2</li>')
+        .replace(/---+/g, '<hr>')
+        .replace(/\n\n/g, '</p><p>')
+        .replace(/\n/g, '<br>');
+    
+    // Wrap in paragraph tags
+    html = '<p>' + html + '</p>';
+    
+    // Fix multiple paragraph tags
+    html = html.replace(/<p><\/p>/g, '');
+    html = html.replace(/<p><h/g, '<h');
+    html = html.replace(/<\/h(\d)><\/p>/g, '</h$1>');
+    html = html.replace(/<p><hr><\/p>/g, '<hr>');
+    
+    // Wrap list items in ul tags
+    html = html.replace(/(<li>.*?<\/li>)/gs, '<ul>$1</ul>');
+    html = html.replace(/<\/ul>\s*<ul>/g, '');
+    
+    return html;
+}
 
 // Utility Functions
 function generateId() {
@@ -119,6 +212,9 @@ function loadPage(page) {
         case 'family-history':
             renderFamilyHistory();
             break;
+        case 'reports':
+            renderReports();
+            break;
         case 'profile':
             renderProfile();
             break;
@@ -180,6 +276,8 @@ function renderDashboard() {
 function initLabResults() {
     const uploadZone = document.getElementById('uploadZone');
     const fileInput = document.getElementById('fileInput');
+    const shareReportBtn = document.getElementById('shareReportBtn');
+    const copyLinkBtn = document.getElementById('copyLinkBtn');
 
     if (!uploadZone || !fileInput) return;
 
@@ -192,6 +290,15 @@ function initLabResults() {
         const file = e.target.files[0];
         if (file) handleFileUpload(file);
     });
+
+    // Share report functionality
+    if (shareReportBtn) {
+        shareReportBtn.addEventListener('click', shareCurrentReport);
+    }
+
+    if (copyLinkBtn) {
+        copyLinkBtn.addEventListener('click', copyReportLink);
+    }
 
     // Drag and drop
     uploadZone.addEventListener('dragover', (e) => {
@@ -318,10 +425,89 @@ function displayAnalysis(summary, fileName) {
     const currentTestType = document.getElementById('currentTestType');
     const currentTestDate = document.getElementById('currentTestDate');
     const currentAnalysis = document.getElementById('currentAnalysis');
+    const analysisActions = document.getElementById('analysisActions');
 
     if (currentTestType) currentTestType.textContent = fileName;
     if (currentTestDate) currentTestDate.textContent = formatDate(new Date());
-    if (currentAnalysis) currentAnalysis.textContent = summary;
+    
+    if (currentAnalysis) {
+        // Convert markdown to HTML for better display
+        const htmlContent = convertMarkdownToHTML(summary);
+        currentAnalysis.innerHTML = htmlContent;
+    }
+
+    // Store current analysis for sharing
+    AppState.currentAnalysis = {
+        fileName: fileName,
+        summary: summary,
+        date: new Date().toISOString()
+    };
+
+    // Show sharing actions
+    if (analysisActions) {
+        analysisActions.classList.remove('hidden');
+    }
+}
+
+async function shareCurrentReport() {
+    if (!AppState.currentAnalysis) {
+        showToast('No analysis to share', 'error');
+        return;
+    }
+
+    try {
+        const result = await ReportDB.saveReport(AppState.currentAnalysis);
+        
+        if (result.success) {
+            // Add to shared reports
+            AppState.sharedReports.unshift({
+                id: result.reportId,
+                fileName: AppState.currentAnalysis.fileName,
+                shareUrl: result.shareUrl,
+                createdAt: new Date().toISOString()
+            });
+
+            // Show share modal
+            showShareModal(result.shareUrl);
+            showToast('Report shared successfully!', 'success');
+        } else {
+            showToast('Failed to share report', 'error');
+        }
+    } catch (error) {
+        console.error('Error sharing report:', error);
+        showToast('Failed to share report', 'error');
+    }
+}
+
+function showShareModal(shareUrl) {
+    const modal = document.getElementById('shareReportModal');
+    const shareLink = document.getElementById('shareReportLink');
+    
+    if (modal && shareLink) {
+        shareLink.value = shareUrl;
+        modal.classList.remove('hidden');
+    }
+}
+
+async function copyReportLink() {
+    if (!AppState.currentAnalysis) {
+        showToast('No analysis to share', 'error');
+        return;
+    }
+
+    try {
+        const result = await ReportDB.saveReport(AppState.currentAnalysis);
+        
+        if (result.success) {
+            await navigator.clipboard.writeText(result.shareUrl);
+            showToast('Link copied to clipboard!', 'success');
+        } else {
+            showToast('Failed to generate link', 'error');
+        }
+    } catch (error) {
+        console.error('Error copying link:', error);
+        showToast('Failed to copy link', 'error');
+    }
 }
 
 function addToHistory(summary, fileName) {
@@ -346,14 +532,151 @@ function renderHistory() {
     }
 
     container.innerHTML = AppState.labResults.map(result => `
-        <div class="history-item" onclick="displayAnalysis('${result.summary}', '${result.fileName}')">
+        <div class="history-item" onclick="displayAnalysis('${result.summary.replace(/'/g, "\\'")}', '${result.fileName}')">
             <h4>${result.fileName} <span class="history-date">${formatDate(result.date)}</span></h4>
-            <div class="history-summary">${result.summary.substring(0, 150)}...</div>
+            <div class="history-summary">${result.summary.replace(/[#*]/g, '').substring(0, 150)}...</div>
         </div>
     `).join('');
 }
 
-// Medications
+// Reports Page
+function initReports() {
+    const generateLinkBtn = document.getElementById('generateLinkBtn');
+    const reportLink = document.getElementById('reportLink');
+
+    if (generateLinkBtn) {
+        generateLinkBtn.addEventListener('click', async () => {
+            if (!AppState.currentAnalysis) {
+                showToast('No analysis available to share. Upload a lab report first.', 'error');
+                return;
+            }
+
+            try {
+                const result = await ReportDB.saveReport(AppState.currentAnalysis);
+                
+                if (result.success) {
+                    reportLink.value = result.shareUrl;
+                    
+                    // Add to shared reports
+                    AppState.sharedReports.unshift({
+                        id: result.reportId,
+                        fileName: AppState.currentAnalysis.fileName,
+                        shareUrl: result.shareUrl,
+                        createdAt: new Date().toISOString()
+                    });
+                    
+                    renderSharedReports();
+                    showToast('Share link generated!', 'success');
+                } else {
+                    showToast('Failed to generate link', 'error');
+                }
+            } catch (error) {
+                console.error('Error generating link:', error);
+                showToast('Failed to generate link', 'error');
+            }
+        });
+    }
+}
+
+async function renderReports() {
+    try {
+        const result = await ReportDB.getUserReports();
+        
+        if (result.success) {
+            AppState.sharedReports = result.reports;
+            renderSharedReports();
+        }
+    } catch (error) {
+        console.error('Error loading reports:', error);
+    }
+}
+
+function renderSharedReports() {
+    const container = document.getElementById('sharedReportsList');
+    if (!container) return;
+
+    if (AppState.sharedReports.length === 0) {
+        container.innerHTML = '<div class="empty-state"><p>No shared reports yet</p></div>';
+        return;
+    }
+
+    container.innerHTML = AppState.sharedReports.map(report => `
+        <div class="shared-report-item" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 0.5rem;">
+            <div>
+                <h4 style="margin: 0; font-size: 1rem;">${report.fileName}</h4>
+                <p style="margin: 0; font-size: 0.875rem; color: var(--text-secondary);">
+                    Shared on ${formatDate(report.createdAt)}
+                </p>
+            </div>
+            <div style="display: flex; gap: 0.5rem;">
+                <button class="btn btn-secondary btn-sm" onclick="copyToClipboard('${report.shareUrl}')">
+                    <i class="fas fa-copy"></i> Copy
+                </button>
+                <button class="btn btn-outline btn-sm" onclick="deleteSharedReport('${report.id}')">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        </div>
+    `).join('');
+}
+
+async function copyToClipboard(text) {
+    try {
+        await navigator.clipboard.writeText(text);
+        showToast('Link copied to clipboard!', 'success');
+    } catch (error) {
+        showToast('Failed to copy link', 'error');
+    }
+}
+
+function deleteSharedReport(reportId) {
+    AppState.sharedReports = AppState.sharedReports.filter(r => r.id !== reportId);
+    renderSharedReports();
+    showToast('Shared report deleted', 'success');
+}
+
+// Initialize share modal handlers
+function initShareModal() {
+    const closeShareModal = document.getElementById('closeShareModal');
+    const closeShareModalBtn = document.getElementById('closeShareModalBtn');
+    const copyShareLinkBtn = document.getElementById('copyShareLinkBtn');
+    const shareModal = document.getElementById('shareReportModal');
+
+    if (closeShareModal) {
+        closeShareModal.addEventListener('click', () => {
+            shareModal.classList.add('hidden');
+        });
+    }
+
+    if (closeShareModalBtn) {
+        closeShareModalBtn.addEventListener('click', () => {
+            shareModal.classList.add('hidden');
+        });
+    }
+
+    if (copyShareLinkBtn) {
+        copyShareLinkBtn.addEventListener('click', async () => {
+            const shareLink = document.getElementById('shareReportLink');
+            try {
+                await navigator.clipboard.writeText(shareLink.value);
+                showToast('Link copied to clipboard!', 'success');
+            } catch (error) {
+                showToast('Failed to copy link', 'error');
+            }
+        });
+    }
+
+    // Close on overlay click
+    if (shareModal) {
+        shareModal.addEventListener('click', (e) => {
+            if (e.target === shareModal || e.target.classList.contains('modal-overlay')) {
+                shareModal.classList.add('hidden');
+            }
+        });
+    }
+}
+
+// Medications (keeping existing code)
 function initMedications() {
     const addBtn = document.getElementById('addMedicationBtn');
     const modal = document.getElementById('addMedicationModal');
@@ -493,7 +816,7 @@ function formatFrequency(frequency) {
     return frequencies[frequency] || frequency;
 }
 
-// Family History
+// Family History (keeping existing code)
 function initFamilyHistory() {
     const addBtn = document.getElementById('addFamilyMemberBtn');
     const modal = document.getElementById('addFamilyMemberModal');
@@ -622,7 +945,7 @@ function deleteFamilyMember(id) {
     }
 }
 
-// Profile
+// Profile (keeping existing code)
 function initProfile() {
     const personalForm = document.getElementById('personalInfoForm');
     const addConditionBtn = document.getElementById('addConditionBtn');
@@ -719,6 +1042,8 @@ document.addEventListener('DOMContentLoaded', () => {
     initMedications();
     initFamilyHistory();
     initProfile();
+    initReports();
+    initShareModal();
     
     // Load initial page
     loadPage(AppState.currentPage);

@@ -38,9 +38,17 @@
                     <i class="fas fa-users"></i>
                     <span>Family History</span>
                 </li>
+                <li class="menu-item" data-page="reports">
+                    <i class="fas fa-file-medical"></i>
+                    <span>Reports</span>
+                </li>
                 <li class="menu-item" data-page="profile">
                     <i class="fas fa-user"></i>
                     <span>Profile</span>
+                </li>
+                <li class="menu-item" data-page="SignUp/Login" onclick="window.open('https://medsync-firebase.vercel.app', '_blank')">
+                    <i class="fas fa-external-link-alt"></i>
+                    <span>Sign Up</span>
                 </li>
             </ul>
         </nav>
@@ -81,7 +89,7 @@
                                 <i class="fas fa-chart-line"></i>
                             </div>
                             <div class="card-content">
-                                <h3>Consistency</h3>
+                                <h3>Adherence Rate</h3>
                                 <p id="consistencyRate">89%</p>
                             </div>
                         </div>
@@ -137,6 +145,14 @@
                             <div class="analysis-content" id="currentAnalysis">
                                 Upload a lab report to see AI-powered analysis of your results.
                             </div>
+                            <div class="analysis-actions hidden" id="analysisActions">
+                                <button class="btn btn-primary" id="shareReportBtn">
+                                    <i class="fas fa-share"></i> Share Report
+                                </button>
+                                <button class="btn btn-secondary" id="copyLinkBtn">
+                                    <i class="fas fa-copy"></i> Copy Link
+                                </button>
+                            </div>
                         </div>
                     </div>
 
@@ -145,6 +161,36 @@
                         <div id="analysisHistory">
                             <div class="empty-state">
                                 <p>No previous analyses available</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reports Page -->
+            <div class="page" id="reports">
+                <div class="page-header">
+                    <h1>Shared Reports</h1>
+                    <p>View and manage your shared lab reports</p>
+                </div>
+
+                <div class="reports-grid">
+                    <div class="card">
+                        <h3><i class="fas fa-link"></i> Generate Report Link</h3>
+                        <p>Create a shareable link for your latest lab analysis to share with doctors or family members.</p>
+                        <div class="link-generator">
+                            <input type="text" id="reportLink" readonly placeholder="Generate a link first...">
+                            <button class="btn btn-primary" id="generateLinkBtn">
+                                <i class="fas fa-link"></i> Generate Link
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3><i class="fas fa-list"></i> My Shared Reports</h3>
+                        <div id="sharedReportsList">
+                            <div class="empty-state">
+                                <p>No shared reports yet</p>
                             </div>
                         </div>
                     </div>
@@ -337,6 +383,35 @@
                 <button type="button" class="btn btn-primary" id="saveFamilyMemberBtn">
                     <i class="fas fa-save"></i> Save
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Share Report Modal -->
+    <div class="modal hidden" id="shareReportModal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Share Lab Report</h3>
+                <button class="modal-close" id="closeShareModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Your lab report has been saved and is ready to share:</p>
+                <div class="share-link-container">
+                    <input type="text" id="shareReportLink" readonly>
+                    <button class="btn btn-secondary" id="copyShareLinkBtn">
+                        <i class="fas fa-copy"></i> Copy
+                    </button>
+                </div>
+                <p class="share-note">
+                    <i class="fas fa-info-circle"></i>
+                    This link will be valid for 30 days and can be accessed without login.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="closeShareModalBtn">Done</button>
             </div>
         </div>
     </div>
